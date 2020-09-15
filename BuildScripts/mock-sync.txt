@@ -1,0 +1,10 @@
+HPL2/core
+HPL2/tests
+HPL2/tools
+HPL2/dependencies/include
+HPL2/dependencies/OALWrapper
+HPL2/dependencies/sources/binreloc
+HPL2/dependencies/lib/linux
+HPL2/dependencies/lib/linux64
+CMakeLists.txt
+Game/src

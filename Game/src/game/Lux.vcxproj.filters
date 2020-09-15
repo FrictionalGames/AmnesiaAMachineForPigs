@@ -1,0 +1,694 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="LuxArea.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_Examine.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_Flashback.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_Ladder.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_Liquid.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_Rope.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_Script.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_Sign.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_SlimeDamage.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_Sticky.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxAreaNodes.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxBase.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxCommentaryIcon.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxCompletionCountHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxConfigHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxCredits.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxCritter_Bug.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxCritter_Spider.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxDebugHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxDemoEnd.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEffectHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEffectRenderer.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEnemy.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEnemy_Grunt.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEnemy_WaterLurker.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEnemyMover.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEnemyPathfinder.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEntity.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxGlobalDataHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxHandObject.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxHandObject_LightSource.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxHandObject_Melee.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxHelpFuncs.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxHintHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxInputHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxInteractConnections.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxItemType.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxLoadScreenHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMainMenu.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMainMenu_CustomStory.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMainMenu_KeyConfig.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMainMenu_LoadGame.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMainMenu_Options.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMainMenu_Profile.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMap.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMapHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMapHelper.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMessageHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMoveState.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMoveState_ClimbLedge.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMoveState_Normal.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxMusicHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayer.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerHands.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerHelpers.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_DefaultBase.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_HandObject.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_Interact.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_InteractGrab.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_InteractLever.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_InteractPush.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_InteractRotateBase.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_InteractSlide.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_InteractSwingDoor.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_InteractWheel.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_Ladder.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_Normal.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPlayerState_UseItem.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPostEffects.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxPreMenu.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProgressLogHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_Button.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_Chest.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_CritterBase.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_EmotionStone.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_Item.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_Lamp.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_LevelDoor.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_Lever.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_MoveObject.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_MultiSlider.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_NPC.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_Object.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_Photocell.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_SwingDoor.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_Wheel.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxSavedEngineTypes.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxSavedGame.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxSavedGameTypes.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxSavedMap.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxSaveHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxScriptHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxStaticProp.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxTypes.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxInfectionHandler.cpp">
+      <Filter>pigs</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxJournal.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_Infection.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEnemy_ManPig.cpp">
+      <Filter>pigs</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxAnimatedProp.cpp">
+      <Filter>pigs</Filter>
+    </ClCompile>
+    <ClCompile Include="PostEffect_Cells.cpp">
+      <Filter>pigs</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_VoiceFlashbackTrigger.cpp">
+      <Filter>pigs</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxProp_PhoneBox.cpp">
+      <Filter>pigs</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxArea_ColorGrading.cpp">
+      <Filter>pigs</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxEnemy_Child.cpp">
+      <Filter>pigs</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxInventory.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+    <ClCompile Include="LuxAchievementHandler.cpp">
+      <Filter>original</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StdAfx.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_Examine.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_Flashback.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_Ladder.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_Liquid.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_Rope.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_Script.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_Sign.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_SlimeDamage.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_Sticky.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxAreaNodes.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxBase.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxCommentaryIcon.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxCompletionCountHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxConfigHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxCredits.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxCritter_Bug.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxCritter_Spider.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxDebugHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxDemoEnd.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEffectHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEffectRenderer.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEnemy.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEnemy_Grunt.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEnemy_WaterLurker.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEnemyMover.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEnemyPathfinder.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEntity.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxGlobalDataHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxHandObject.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxHandObject_LightSource.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxHandObject_Melee.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxHelpFuncs.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxHintHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxInputHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxInteractConnections.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxItemType.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxLoadScreenHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMainMenu.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMainMenu_CustomStory.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMainMenu_KeyConfig.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMainMenu_LoadGame.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMainMenu_Options.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMainMenu_Profile.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMap.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMapHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMapHelper.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMessageHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMoveState.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMoveState_ClimbLedge.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMoveState_Normal.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxMusicHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayer.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerHands.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerHelpers.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_DefaultBase.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_HandObject.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_Interact.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_InteractGrab.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_InteractLever.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_InteractPush.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_InteractRotateBase.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_InteractSlide.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_InteractSwingDoor.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_InteractWheel.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_Ladder.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_Normal.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPlayerState_UseItem.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPostEffects.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxPreMenu.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProgressLogHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_Button.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_Chest.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_CritterBase.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_EmotionStone.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_Item.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_Lamp.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_LevelDoor.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_Lever.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_MoveObject.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_MultiSlider.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_NPC.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_Object.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_Photocell.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_SwingDoor.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_Wheel.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxSavedEngineTypes.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxSavedGame.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxSavedGameTypes.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxSavedMap.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxSaveHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxScriptHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxStaticProp.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxTypes.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxInfectionHandler.h">
+      <Filter>pigs</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxJournal.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_Infection.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEnemy_ManPig.h">
+      <Filter>pigs</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxAnimatedProp.h">
+      <Filter>pigs</Filter>
+    </ClInclude>
+    <ClInclude Include="PostEffect_Cells.h">
+      <Filter>pigs</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_VoiceFlashbackTrigger.h">
+      <Filter>pigs</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxProp_PhoneBox.h">
+      <Filter>pigs</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxArea_ColorGrading.h">
+      <Filter>pigs</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxIdleBehavior_ManPig.h">
+      <Filter>pigs</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxEnemy_Child.h">
+      <Filter>pigs</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxInventory.h">
+      <Filter>original</Filter>
+    </ClInclude>
+    <ClInclude Include="LuxAchievementHandler.h">
+      <Filter>original</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="pigs">
+      <UniqueIdentifier>{9e88d2ec-e371-43b6-bec8-b694545cbdbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="original">
+      <UniqueIdentifier>{b3ded0dc-a088-47e2-b4a2-f5f4337aa24c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="original\modified">
+      <UniqueIdentifier>{5de9ad1a-27be-4d61-bd96-33578972470e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Lux.ico">
+      <Filter>original</Filter>
+    </None>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="..\..\..\ExeIcon\256x256\FG_AAMFP_exeIcon_256x256_mandusBorder.png" />
+    <None Include="aamfp.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Lux.rc">
+      <Filter>original</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
