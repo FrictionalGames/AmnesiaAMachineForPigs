@@ -217,6 +217,7 @@ add_library(HPL2 STATIC
 )
 
 if (LINUX)
+    set_property(TARGET FBX PROPERTY INTERFACE_LINK_LIBRARIES ${CMAKE_DL_LIBS})
     target_link_libraries(HPL2
         OALWrapper # also pulls in ogg,vorbis,SDL
         Newton angelscript binreloc
@@ -224,7 +225,7 @@ if (LINUX)
         theora
         IL
         z
-        pthread dl
+        pthread
         FBX
     )
 ELSEIF(APPLE)
