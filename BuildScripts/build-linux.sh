@@ -2,6 +2,7 @@
 
 dir=$PWD
 arch=$1
+cores=`nproc`
 
 if [ -z "$arch" ]; then
     echo "Specify if 32 or 64 arch sync"
@@ -43,8 +44,8 @@ cd /builddir/$dst_root
 mkdir -p build
 cd build
 cmake28 $cmake_path -DCMAKE_BUILD_TYPE=Release $cmake_options
-make -j4
-make -j4 AmnesiaSteam
+make -j $cores
+make -j $cores AmnesiaSteam
 cd ..
 EOSCRIPT
 
