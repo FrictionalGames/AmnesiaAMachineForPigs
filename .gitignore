@@ -348,3 +348,24 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+#ignore generated files and folders
+core/
+game/
+launcher/
+AmnesiaAMFP.bin.x86_64
+CMakeCache.txt
+CMakeFiles/
+HPL2/core/CMakeCache.txt
+HPL2/core/CMakeFiles/
+HPL2/core/sources/BuildID_HPL2_0_Linux.cpp
+HPL2/dependencies/
+Launcher.bin.x86_64
+Makefile
+cmake_install.cmake
+
+#ignore temp files
+
+
+
+

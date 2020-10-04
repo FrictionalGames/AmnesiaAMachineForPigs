@@ -3,7 +3,7 @@ project(HPL2)
 
 set(HPL2_VERSION_MAJOR 2)
 set(HPL2_VERSION_MINOR 0)
-
+set(CMAKE_CXX_FLAGS "-fpermissive -no-pie")
 set(HPL2_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE)
 set(DEP_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../dependencies/include" PARENT_SCOPE)
 set(DEP_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../dependencies/lib/${BIN_LIBROOT}")
