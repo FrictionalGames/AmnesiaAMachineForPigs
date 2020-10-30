@@ -685,8 +685,7 @@ bool cLuxBase::ParseCommandLine(const tString &asCommandline)
 	//////////////////////////////////
 	//Main Init config file
 	// TODO: Parse the command line better?
-	msCommandLineMapFile = asCommandline;
-	msCommandLineMapFile = cString::Sub(msCommandLineMapFile, 5);
+	msInitConfigFile = cString::To16Char(asCommandline);
 	if(msInitConfigFile==_W("")) msInitConfigFile = _W("config/main_init.cfg");
 
 	return true;
