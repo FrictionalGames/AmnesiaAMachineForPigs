@@ -1002,7 +1002,6 @@ void cLuxMainMenu::CreateTopMenuGui()
 
 	///////////////
 	//Custom map
-	/*
 	#ifndef LUX_DEMO_VERSION
 		if(	gpBase->mbPTestActivated==false &&
 			gpBase->mpMapHandler->MapIsLoaded()==false) 
@@ -1013,7 +1012,6 @@ void cLuxMainMenu::CreateTopMenuGui()
 			vPos.y += fRowAdd;
 		}
 	#endif
-	*/
 
 	///////////////
 	//Options
