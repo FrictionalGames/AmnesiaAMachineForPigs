@@ -176,7 +176,7 @@ namespace hpl {
 			{
 				hplDelete(pDoc);
 
-				return false;
+				return nullptr;
 			}
 			bLoadedFromNormalFile = true;
 		}
@@ -188,7 +188,7 @@ namespace hpl {
 			if(compBuffer.Load(asFile)==false)
 			{
 				//Log("Could not load compressed map!\n");
-				return false;
+				return nullptr;
 			}
 
 			int lKey = kEncryptKey;
@@ -198,14 +198,14 @@ namespace hpl {
 			if(textBuff.DecompressAndAddFromBuffer(&compBuffer, false)==false)
 			{
 				//Log("Could not decompress map!\n");
-				return false;
+				return nullptr;
 			}
 
 			if(pDoc->CreateFromString(textBuff.GetDataPointerAtCurrentPos())==false)
 			{
 				hplDelete(pDoc);
 				//Log("Could not parse map!\n");
-				return false;
+				return nullptr;
 			}
 		}
 
@@ -313,7 +313,7 @@ namespace hpl {
 		if(pXmlContents==NULL)
 		{
 			hplDelete(pDoc);
-			return false;
+			return nullptr;
 		}
 
 		///////////////////////////////////
