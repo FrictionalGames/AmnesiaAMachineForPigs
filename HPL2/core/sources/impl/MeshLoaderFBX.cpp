@@ -50,13 +50,13 @@
 
 namespace hpl {
 
-	static KFbxXMatrix GetGeometry(KFbxNode* pNode) {
-		KFbxVector4 lT, lR, lS;
-		KFbxXMatrix lGeometry;
+	static FbxAMatrix GetGeometry(fbxsdk::FbxNode* pNode) {
+		fbxsdk::FbxVector4 lT, lR, lS;
+		FbxAMatrix lGeometry;
 
-		lT = pNode->GetGeometricTranslation(KFbxNode::eSOURCE_SET);
-		lR = pNode->GetGeometricRotation(KFbxNode::eSOURCE_SET);
-		lS = pNode->GetGeometricScaling(KFbxNode::eSOURCE_SET);
+		lT = pNode->GetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+		lR = pNode->GetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+		lS = pNode->GetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
 
 	    lGeometry.SetT(lT);
 	    lGeometry.SetR(lR);
@@ -65,14 +65,14 @@ namespace hpl {
 	    return lGeometry;
 	}
 
-	static KFbxMatrix GetGeometryTwo(KFbxNode* pNode) {
-		KFbxVector4 lT, lR, lS;
+	static FbxMatrix GetGeometryTwo(fbxsdk::FbxNode* pNode) {
+		fbxsdk::FbxVector4 lT, lR, lS;
 
-		lT = pNode->GetGeometricTranslation(KFbxNode::eSOURCE_SET);
-		lR = pNode->GetGeometricRotation(KFbxNode::eSOURCE_SET);
-		lS = pNode->GetGeometricScaling(KFbxNode::eSOURCE_SET);
+		lT = pNode->GetGeometricTranslation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+		lR = pNode->GetGeometricRotation(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+		lS = pNode->GetGeometricScaling(fbxsdk::FbxNode::EPivotSet::eSourcePivot);
 
-	    return KFbxMatrix( lT, lR, lS );
+	    return FbxMatrix( lT, lR, lS );
 	}
 
 	//////////////////////////////////////////////////////////////////////////
@@ -86,11 +86,11 @@ namespace hpl {
 		mpMeshLoaderMSH = apMeshLoaderMSH;
 		mbLoadAndSaveMSHFormat = abLoadAndSaveMSHFormat;
 
-		mpSdkManager = KFbxSdkManager::Create();
+		mpSdkManager = FbxManager::Create();
 
 		AddSupportedExtension("fbx");
 
-		KFbxIOSettings * ios = KFbxIOSettings::Create(mpSdkManager, IOSROOT );
+		FbxIOSettings * ios = FbxIOSettings::Create(mpSdkManager, IOSROOT );
 		mpSdkManager->SetIOSettings(ios);
 
 		mbLog = true;
@@ -132,8 +132,8 @@ namespace hpl {
 			}
 		}
 
-		KFbxScene * pScene = KFbxScene::Create(mpSdkManager,"");
-		KFbxImporter* pImporter = KFbxImporter::Create(mpSdkManager,"");
+		fbxsdk::FbxScene * pScene = fbxsdk::FbxScene::Create(mpSdkManager,"");
+		FbxImporter* pImporter = FbxImporter::Create(mpSdkManager,"");
 
 		LoadScene(mpSdkManager, pScene, cString::To8Char(asFile).c_str());
 
@@ -153,6 +153,11 @@ namespace hpl {
 
 		//Go through all nodes
 		if(mbLog)Log("Loading scene '%s':\n", asFile.c_str());
+
+
+		fbxsdk::FbxGeometryConverter pConverter( mpSdkManager );
+		pConverter.Triangulate(pScene, true);
+
 		LoadSceneRec(&lstSubData,pSkeleton,NULL,pScene->GetRootNode(),0, false);
 
 		//Finalize the bones. That is remove non-linked bones and
@@ -171,8 +176,8 @@ namespace hpl {
 		cAnimation *pAnimation = NULL;//LoadAnimations(pScene, pImporter, asFile,pSkeleton);
 
 		//Clean up
-		pScene->Destroy(true,true);
-		pImporter->Destroy(true,true);
+		pScene->Destroy(true);
+		pImporter->Destroy(true);
 		
 		//Create the mesh
 		cMesh *pMesh = hplNew( cMesh, (cString::To8Char(asFile), asFile, mpMaterialManager,mpAnimationManager) );
@@ -258,8 +263,8 @@ namespace hpl {
 			}
 		}
 
-		KFbxScene * pScene = KFbxScene::Create(mpSdkManager,"");
-		KFbxImporter* pImporter = KFbxImporter::Create(mpSdkManager,"");
+		fbxsdk::FbxScene * pScene = fbxsdk::FbxScene::Create(mpSdkManager,"");
+		FbxImporter* pImporter = FbxImporter::Create(mpSdkManager,"");
 
 		LoadScene(mpSdkManager, pScene, cString::To8Char(asFile).c_str());
 
@@ -295,8 +300,8 @@ namespace hpl {
 		cAnimation *pAnimation = LoadAnimations(pScene, pImporter, asFile,pSkeleton);
 
 		//Clean up
-		pScene->Destroy(true,true);
-		pImporter->Destroy(true,true);
+		pScene->Destroy(true);
+		pImporter->Destroy(true);
 		
 		if(pSkeleton) hplDelete(pSkeleton);
 
@@ -319,11 +324,11 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 
-	cAnimation*  cMeshLoaderFBX::LoadAnimations(KFbxScene *apScene, KFbxImporter* apImporter, const tWString& asFile, cSkeleton * apSkeleton)
+	cAnimation*  cMeshLoaderFBX::LoadAnimations(fbxsdk::FbxScene *apScene, FbxImporter* apImporter, const tWString& asFile, cSkeleton * apSkeleton)
 	{
 		int lTake = -1;
-
-		KArrayTemplate<KString*> vStrings;
+		
+		fbxsdk::FbxArray<fbxsdk::FbxString *> vStrings;
 		apScene->FillAnimStackNameArray(vStrings);
 
 		Log("Animations: ");
@@ -338,7 +343,7 @@ namespace hpl {
 		
         for(int i=0;i<vStrings.GetCount();i++)
 		{
-			KFbxTakeInfo* pTakeInfo = apScene->GetTakeInfo(*vStrings[i]);
+			FbxTakeInfo* pTakeInfo = apScene->GetTakeInfo(*vStrings[i]);
 			if(pTakeInfo==NULL)continue;
 
 			Log("Info for '%s'\n",vStrings[i]->Buffer());
@@ -374,25 +379,25 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 	
-	static KFCurve *GetCurve(KFbxNode *apNode, KFbxAnimLayer * apAnimLayer, tAnimTransformFlag aType, int alAxis)
+	static fbxsdk::FbxAnimCurve *GetCurve(fbxsdk::FbxNode *apNode, FbxAnimLayer * apAnimLayer, tAnimTransformFlag aType, int alAxis)
 	{
-		KFCurve *pCurve=NULL;
+		fbxsdk::FbxAnimCurve *pCurve=NULL;
 		switch(aType)
 		{
 		case eAnimTransformFlag_Translate:
-			if(alAxis==0) pCurve = apNode->LclTranslation.GetCurve<KFbxAnimCurve>(apAnimLayer, KFCURVENODE_T_X, true)->GetKFCurve();
-			if(alAxis==1) pCurve = apNode->LclTranslation.GetCurve<KFbxAnimCurve>(apAnimLayer, KFCURVENODE_T_Y, true)->GetKFCurve();
-			if(alAxis==2) pCurve = apNode->LclTranslation.GetCurve<KFbxAnimCurve>(apAnimLayer, KFCURVENODE_T_Z, true)->GetKFCurve();
+			if(alAxis==0) pCurve = apNode->LclTranslation.GetCurve(apAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+			if(alAxis==1) pCurve = apNode->LclTranslation.GetCurve(apAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+			if(alAxis==2) pCurve = apNode->LclTranslation.GetCurve(apAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 			break;
 		case eAnimTransformFlag_Scale:
-			if(alAxis==0) pCurve = apNode->LclScaling.GetCurve<KFbxAnimCurve>(apAnimLayer, KFCURVENODE_S_X, true)->GetKFCurve();
-			if(alAxis==1) pCurve = apNode->LclScaling.GetCurve<KFbxAnimCurve>(apAnimLayer, KFCURVENODE_S_Y, true)->GetKFCurve();
-			if(alAxis==2) pCurve = apNode->LclScaling.GetCurve<KFbxAnimCurve>(apAnimLayer, KFCURVENODE_S_Z, true)->GetKFCurve();
+			if(alAxis==0) pCurve = apNode->LclScaling.GetCurve(apAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+			if(alAxis==1) pCurve = apNode->LclScaling.GetCurve(apAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+			if(alAxis==2) pCurve = apNode->LclScaling.GetCurve(apAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 			break;
 		case eAnimTransformFlag_Rotate:
-			if(alAxis==0) pCurve = apNode->LclRotation.GetCurve<KFbxAnimCurve>(apAnimLayer, KFCURVENODE_R_X, true)->GetKFCurve();
-			if(alAxis==1) pCurve = apNode->LclRotation.GetCurve<KFbxAnimCurve>(apAnimLayer, KFCURVENODE_R_Y, true)->GetKFCurve();
-			if(alAxis==2) pCurve = apNode->LclRotation.GetCurve<KFbxAnimCurve>(apAnimLayer, KFCURVENODE_R_Z, true)->GetKFCurve();
+			if(alAxis==0) pCurve = apNode->LclRotation.GetCurve(apAnimLayer, FBXSDK_CURVENODE_COMPONENT_X, true);
+			if(alAxis==1) pCurve = apNode->LclRotation.GetCurve(apAnimLayer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+			if(alAxis==2) pCurve = apNode->LclRotation.GetCurve(apAnimLayer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 			break;
 		}
 
@@ -401,13 +406,13 @@ namespace hpl {
 
 	////////////////////////
 
-	static void GetAnimTimes(tAnimTimeSet *pTimesSet,KFbxNode * apNode, KFbxAnimLayer * apAnimLayer, tAnimTransformFlag aType, int alAxis)
+	static void GetAnimTimes(tAnimTimeSet *pTimesSet,fbxsdk::FbxNode * apNode, FbxAnimLayer * apAnimLayer, tAnimTransformFlag aType, int alAxis)
 	{
-		KFCurve *pCurve = GetCurve(apNode,apAnimLayer, aType, alAxis);
+		fbxsdk::FbxAnimCurve *pCurve = GetCurve(apNode,apAnimLayer, aType, alAxis);
 
-		for(int i=0;i<pCurve->KeyGetCount();i++)
+		for(int i=0; i < pCurve->KeyGetCount(); i++)
 		{
-			KFCurveKey key = pCurve->KeyGet(i);
+			fbxsdk::FbxAnimCurveKey key = pCurve->KeyGet(i);
 			float fTime = ((float)key.GetTime().GetMilliSeconds()) / 1000.0f;
 
 			pTimesSet->insert(fTime);
@@ -415,17 +420,17 @@ namespace hpl {
 	}
 
 	static void FillKeyVec(tTakeKeyDataVec *pVec,tAnimTimeSet *pTimesSet,
-							KFbxNode *apNode,KFbxAnimLayer * apAnimLayer, tAnimTransformFlag aType, int alAxis)
+							fbxsdk::FbxNode *apNode,FbxAnimLayer * apAnimLayer, tAnimTransformFlag aType, int alAxis)
 	{
-		KFCurve *pCurve = GetCurve(apNode, apAnimLayer,aType, alAxis);
+		fbxsdk::FbxAnimCurve *pCurve = GetCurve(apNode, apAnimLayer,aType, alAxis);
 		
 		pVec->resize(pTimesSet->size());
 		int i=0;
 		tAnimTimeSetIt it = pTimesSet->begin();
 		for(;it != pTimesSet->end(); it++)
 		{
-			KTime time;
-			time.SetMilliSeconds((kLongLong)(*it * 1000));
+			fbxsdk::FbxTime time;
+			time.SetMilliSeconds((fbxsdk::FbxLongLong)(*it * 1000));
 			
 			(*pVec)[i].mfTime = *it;
 			(*pVec)[i].mfValue = pCurve->Evaluate(time);
@@ -527,14 +532,14 @@ namespace hpl {
 	
 	////////////////////////
 	
-	void cMeshLoaderFBX::LoadAnimationRec(KFbxScene *apScene,KFbxNode * apNode, cAnimation* apAnimation,const tString &asAnimStackName, 
+	void cMeshLoaderFBX::LoadAnimationRec(fbxsdk::FbxScene *apScene,fbxsdk::FbxNode * apNode, cAnimation* apAnimation,const tString &asAnimStackName, 
 											int alDepth, 
 											cVector3f vParentT, cVector3f vParentS, cVector3f vParentR, cSkeleton * apSkeleton)
 	{
 		const char * node_name = apNode->GetName();
 
-		KFbxAnimStack * pAnimationStack = apScene->FindMember(FBX_TYPE(KFbxAnimStack), asAnimStackName.c_str());
-		KFbxAnimLayer * pAnimLayer = pAnimationStack->GetMember(FBX_TYPE(KFbxAnimLayer), 0);
+		fbxsdk::FbxAnimStack * pAnimationStack = static_cast<fbxsdk::FbxAnimStack*>(apScene->FindMember(fbxsdk::FbxCriteria::ObjectType(fbxsdk::FbxAnimStack::ClassId), asAnimStackName.c_str()));
+		fbxsdk::FbxAnimLayer * pAnimLayer = static_cast<fbxsdk::FbxAnimLayer*>(pAnimationStack->GetMember(fbxsdk::FbxCriteria::ObjectType(fbxsdk::FbxAnimLayer::ClassId), 0));
 
 		if( pAnimationStack != NULL && apNode->GetSkeleton() )
 		{
@@ -556,10 +561,10 @@ namespace hpl {
 			transFlags |= eAnimTransformFlag_Translate;
 			transFlags |= eAnimTransformFlag_Rotate;
 
-			KFbxVector4 pTranslation;
-			KFbxQuaternion pRotation;
-			KFbxVector4 pShearing;
-			KFbxVector4 pScaling;
+			fbxsdk::FbxVector4 pTranslation;
+			fbxsdk::FbxQuaternion pRotation;
+			fbxsdk::FbxVector4 pShearing;
+			fbxsdk::FbxVector4 pScaling;
 			double pSign;
 
 			tTempKeyFrameDataVec vTempKeyFrame;
@@ -568,19 +573,19 @@ namespace hpl {
 			tAnimTimeSetIt it = setTimes.begin();
 			for(;it != setTimes.end(); it++)
 			{
-				KTime time;
-				time.SetMilliSeconds((kLongLong)(*it * 1000));
+				fbxsdk::FbxTime time;
+				time.SetMilliSeconds((fbxsdk::FbxLongLong)(*it * 1000));
 				
-				KFbxMatrix localTransform = apNode->EvaluateLocalTransform(time, KFbxNode::eSOURCE_SET);
-				KFbxMatrix geometryMatrix = GetGeometryTwo(apNode);
+				FbxMatrix localTransform = apNode->EvaluateLocalTransform(time, fbxsdk::FbxNode::EPivotSet::eSourcePivot);
+				FbxMatrix geometryMatrix = GetGeometryTwo(apNode);
 				localTransform = localTransform * geometryMatrix;
 
 				localTransform.GetElements( pTranslation, pRotation, pShearing, pScaling, pSign);
-
+				
 				vTempKeyFrame[i].mfTime = *it;
-				vTempKeyFrame[i].vTrans = cVector3f( pTranslation.GetAt(0), pTranslation.GetAt(1), pTranslation.GetAt(2) );
-				vTempKeyFrame[i].vScale = cVector3f( pScaling.GetAt(0), pScaling.GetAt(1), pScaling.GetAt(2) );
-				vTempKeyFrame[i].qFinalRot = cQuaternion( pRotation.GetAt(3), pRotation.GetAt(0), pRotation.GetAt(1), pRotation.GetAt(2) );
+				vTempKeyFrame[i].vTrans = cVector3f( pTranslation[0], pTranslation[1], pTranslation[2] );
+				vTempKeyFrame[i].vScale = cVector3f( pScaling[0], pScaling[1], pScaling[2] );
+				vTempKeyFrame[i].qFinalRot = cQuaternion( pRotation[3], pRotation[0], pRotation[1], pRotation[2] );
 				vTempKeyFrame[i].vRot = 0;
 				i++;
 			}
@@ -619,7 +624,7 @@ namespace hpl {
 	
 	//-----------------------------------------------------------------------
 
-	void cMeshLoaderFBX::LoadSkeletonRec(cBone* apBone,	KFbxNode *apNode, int alDepth)
+	void cMeshLoaderFBX::LoadSkeletonRec(cBone* apBone,	fbxsdk::FbxNode *apNode, int alDepth)
 	{
 		if(apNode->GetSkeleton())
 		{
@@ -675,7 +680,7 @@ namespace hpl {
 	//Search the scene for geometry
 	void cMeshLoaderFBX::LoadSceneRec(tSubMeshDataList* apSubMeshList,cSkeleton *apSkeleton, 
 										cNode3D* apHplNode,
-										KFbxNode *apNode, int alDepth, bool animationOnly)
+										fbxsdk::FbxNode *apNode, int alDepth, bool animationOnly)
 	{
 		//Load the Mesh
 		if(apNode->GetMesh())
@@ -692,11 +697,11 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 	
-	cBone* cMeshLoaderFBX::LoadSkeletonData(cBone* apBone,KFbxNode *apNode, int alDepth)
+	cBone* cMeshLoaderFBX::LoadSkeletonData(cBone* apBone,fbxsdk::FbxNode *apNode, int alDepth)
 	{
 		//////////////////////////////////////////////////////
 		// Get bone properties.
-		KFbxSkeleton* pSkeleton = apNode->GetSkeleton();
+		fbxsdk::FbxSkeleton* pSkeleton = apNode->GetSkeleton();
 		
         cBone* pNewBone = apBone->CreateChildBone(apNode->GetName(), apNode->GetName());
 
@@ -727,7 +732,7 @@ namespace hpl {
 
 	//-----------------------------------------------------------------------
 	
-	void cMeshLoaderFBX::LoadMeshData(tSubMeshDataList* apSubMeshList,cSkeleton* apSkeleton, cNode3D* apHplNode, KFbxNode *apNode, int alDepth, bool animationOnly)
+	void cMeshLoaderFBX::LoadMeshData(tSubMeshDataList* apSubMeshList,cSkeleton* apSkeleton, cNode3D* apHplNode, fbxsdk::FbxNode *apNode, int alDepth, bool animationOnly)
 	{
 		//Build this list with uv, pos, normal and color.
 		tVertexVec mvVertexes;
@@ -738,7 +743,7 @@ namespace hpl {
 		//Get the texture name in this
 		cSubMeshData subMeshData;
 
-		KFbxMesh *pMesh = apNode->GetMesh();
+		fbxsdk::FbxMesh *pMesh = apNode->GetMesh();
 		tExtraVertricesVec vExtraVetrices;
         
         tString nodeName = apNode->GetName();
@@ -755,33 +760,21 @@ namespace hpl {
 			bool mbTriangulated=false;
 		
 			if(mbLog)Log("%s Loading node: '%s'\n",GetTabs(alDepth),apNode->GetName());
-
-			//triangulate the mesh
 		
-			KFbxGeometryConverter pConverter( mpSdkManager );
-			//pConverter->TriangulateInPlace(apNode);
-
-		
-
-			KFbxMesh *pTriMesh = pMesh;
-			if(mbTriangulated==false)pTriMesh = pConverter.TriangulateMesh(pMesh);
-	
-			//mpSdkManager->DestroyKFbxGeometryConverter(pConverter);
-
-			KFbxVector4 *pPositions = pMesh->GetControlPoints();
+			fbxsdk::FbxVector4 *pPositions = pMesh->GetControlPoints();
 		
 			//////////////////////////////////////////////////////
 			//Polygons (indicies)
 			if(mbLowLog)Log("%s Polygons:\n %s ",GetTabs(alDepth),GetTabs(alDepth));
-			for(int i=0;i<pTriMesh->GetPolygonCount();i++)
+			for(int i=0;i<pMesh->GetPolygonCount();i++)
 			{
 				if(mbLowLog)Log("[");
-				for(int j=0;j<pTriMesh->GetPolygonSize(i);j++)
+				for(int j=0;j<pMesh->GetPolygonSize(i);j++)
 				{
-					if(mbLowLog)Log("%d", pTriMesh->GetPolygonVertex(i,j));
-					if(mbLowLog)if(j != pTriMesh->GetPolygonSize(i)-1)Log(", ");
+					if(mbLowLog)Log("%d", pMesh->GetPolygonVertex(i,j));
+					if(mbLowLog)if(j != pMesh->GetPolygonSize(i)-1)Log(", ");
 
-					mvIndexes.push_back(pTriMesh->GetPolygonVertex(i,j));
+					mvIndexes.push_back(pMesh->GetPolygonVertex(i,j));
 				}
 				if(mbLowLog)Log("]");
 			}
@@ -792,10 +785,10 @@ namespace hpl {
 			if(mbLowLog)Log("%s Positions:\n %s ",GetTabs(alDepth),GetTabs(alDepth));
 			for(int i=0;i<pMesh->GetControlPointsCount();i++)
 			{
-				if(mbLowLog)Log("(%.1f, %.1f, %.1f) ", pPositions[i].GetAt(0),pPositions[i].GetAt(1),pPositions[i].GetAt(2));
+				if(mbLowLog)Log("(%.1f, %.1f, %.1f) ", pPositions[i][0],pPositions[i][1],pPositions[i][2]);
 				if(mbLowLog)if(i != pMesh->GetControlPointsCount()-1)Log(", ");
 
-				cVector3f vPos((float)pPositions[i].GetAt(0),(float)pPositions[i].GetAt(1),(float)pPositions[i].GetAt(2));
+				cVector3f vPos((float)pPositions[i][0],(float)pPositions[i][1],(float)pPositions[i][2]);
 			
 				//The negative z is because it shows when the vertex has gotten a uv coord.
 				//And then extra uvs can be found.
@@ -803,44 +796,44 @@ namespace hpl {
 			}
 			if(mbLowLog)Log("\n");
 
-			KFbxLayer *pLayer = pTriMesh->GetLayer(0);
+			fbxsdk::FbxLayer *pLayer = pMesh->GetLayer(0);
 
 			//////////////////////////////////////////////////////
 			//Normals
-			KFbxLayerElementNormal *pNormLayer = pLayer->GetNormals();
+			fbxsdk::FbxLayerElementNormal *pNormLayer = pLayer->GetNormals();
 			
 			if(pNormLayer)
 			{
 				if(mbLog)Log("%s Normal mapping mode: %d \n",GetTabs(alDepth), pNormLayer->GetMappingMode());
 				if(mbLog)Log("%s Normal reference mode: %d \n",GetTabs(alDepth), pNormLayer->GetReferenceMode());
-
-				if(pNormLayer->GetMappingMode() == KFbxLayerElementNormal::eBY_CONTROL_POINT)
+	
+				if(pNormLayer->GetMappingMode() == fbxsdk::FbxLayerElement::EMappingMode::eByControlPoint)
 				{
-					KFbxLayerElementNormal::DirectArrayType pNormals = pNormLayer->GetDirectArray();
+					fbxsdk::FbxLayerElementNormal::DirectArrayType pNormals = pNormLayer->GetDirectArray();
 
 					if(mbLowLog)Log("%s Normals:\n %s ",GetTabs(alDepth),GetTabs(alDepth));
 					for(int i=0;i<pMesh->GetControlPointsCount();i++)
 					{
-						if(mbLowLog)Log("(%.1f, %.1f, %.1f) ", pNormals[i].GetAt(0),pNormals[i].GetAt(1),pNormals[i].GetAt(2));
+						if(mbLowLog)Log("(%.1f, %.1f, %.1f) ", pNormals[i][0],pNormals[i][1],pNormals[i][2]);
 						if(mbLowLog)if(i != pMesh->GetControlPointsCount()-1)Log(", ");
 
-						cVector3f vPos((float)pNormals[i].GetAt(0),(float)pNormals[i].GetAt(1),(float)pNormals[i].GetAt(2));
+						cVector3f vPos((float)pNormals[i][0],(float)pNormals[i][1],(float)pNormals[i][2]);
 
 						mvVertexes[i].norm = vPos;
 					}
 
 					if(mbLowLog)Log("\n");
 				}
-				else if(pNormLayer->GetMappingMode() == KFbxLayerElementNormal::eBY_POLYGON_VERTEX)
+				else if(pNormLayer->GetMappingMode() == fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex)
 				{
-					if ( pNormLayer->GetReferenceMode() == KFbxLayerElement::eDIRECT )
+					if ( pNormLayer->GetReferenceMode() == fbxsdk::FbxLayerElement::EReferenceMode::eDirect )
 					{
-						KFbxLayerElementNormal::DirectArrayType pNormals = pNormLayer->GetDirectArray();
+						fbxsdk::FbxLayerElementNormal::DirectArrayType pNormals = pNormLayer->GetDirectArray();
 
 						if(mbLowLog)Log("%s Normals:\n %s ",GetTabs(alDepth),GetTabs(alDepth));
 						for ( int i = 0; i < (int)mvIndexes.size(); i++)
 						{
-							cVector3f vPos((float)pNormals[i].GetAt(0),(float)pNormals[i].GetAt(1),(float)pNormals[i].GetAt(2));
+							cVector3f vPos((float)pNormals[i][0],(float)pNormals[i][1],(float)pNormals[i][2]);
 							mvVertexes[mvIndexes[i]].norm = vPos;
 						}
 					}
@@ -854,38 +847,38 @@ namespace hpl {
 
 			//////////////////////////////////////////////////////
 			//Tangents
-			KFbxLayerElementTangent *pTangentLayer = pLayer->GetTangents();
-			KFbxLayerElementTangent::DirectArrayType pTangents = pTangentLayer->GetDirectArray();
-			KFbxLayerElementArrayTemplate<int> pTangentIndices = pTangentLayer->GetIndexArray();
+			fbxsdk::FbxLayerElementTangent *pTangentLayer = pLayer->GetTangents();
+			fbxsdk::FbxLayerElementTangent::DirectArrayType pTangents = pTangentLayer->GetDirectArray();
+			fbxsdk::FbxLayerElementArrayTemplate<int> pTangentIndices = pTangentLayer->GetIndexArray();
 			
 			if(pTangentLayer)
 			{
 				if(mbLog)Log("%s Tangent mapping mode: %d \n",GetTabs(alDepth), pTangentLayer->GetMappingMode());
 				if(mbLog)Log("%s Tangent reference mode: %d \n",GetTabs(alDepth), pTangentLayer->GetReferenceMode());
 
-				if(pTangentLayer->GetMappingMode() == KFbxLayerElementNormal::eBY_CONTROL_POINT)
+				if(pTangentLayer->GetMappingMode() == fbxsdk::FbxLayerElement::EMappingMode::eByControlPoint)
 				{
 					if(mbLowLog)Log("%s Tangents:\n %s ",GetTabs(alDepth),GetTabs(alDepth));
 					for(int i=0;i<pMesh->GetControlPointsCount();i++)
 					{
-						if(mbLowLog)Log("(%.1f, %.1f, %.1f) ", pTangents[i].GetAt(0),pTangents[i].GetAt(1),pTangents[i].GetAt(2));
+						if(mbLowLog)Log("(%.1f, %.1f, %.1f) ", pTangents[i][0],pTangents[i][1],pTangents[i][2]);
 						if(mbLowLog)if(i != pMesh->GetControlPointsCount()-1)Log(", ");
 
-						cVector3f vPos((float)pTangents[i].GetAt(0),(float)pTangents[i].GetAt(1),(float)pTangents[i].GetAt(2));
+						cVector3f vPos((float)pTangents[i][0],(float)pTangents[i][1],(float)pTangents[i][2]);
 
 						mvVertexes[i].tan = vPos;
 					}
 
 					if(mbLowLog)Log("\n");
 				}
-				else if(pTangentLayer->GetMappingMode() == KFbxLayerElementNormal::eBY_POLYGON_VERTEX)
+				else if(pTangentLayer->GetMappingMode() == fbxsdk::FbxLayerElement::EMappingMode::eByPolygonVertex)
 				{
 					/*for(int i=0;i<pMesh->GetControlPointsCount();i++)
 					{
-						if(mbLowLog)Log("(%.1f, %.1f, %.1f) ", pTangents[i].GetAt(0),pTangents[i].GetAt(1),pTangents[i].GetAt(2));
+						if(mbLowLog)Log("(%.1f, %.1f, %.1f) ", pTangents[i][0],pTangents[i][1],pTangents[i][2]);
 						if(mbLowLog)if(i != pMesh->GetControlPointsCount()-1)Log(", ");
 
-						cVector3f vPos((float)pTangents[i].GetAt(0),(float)pTangents[i].GetAt(1),(float)pTangents[i].GetAt(2));
+						cVector3f vPos((float)pTangents[i][0],(float)pTangents[i][1],(float)pTangents[i][2]);
 
 						mvVertexes[i].tan = vPos;
 					}
@@ -903,17 +896,17 @@ namespace hpl {
 							int positionIndex = polygonVertexIndex + vertexIndex;
 
 							
-							cVector3f vPos((float)pTangents[positionIndex].GetAt(0),(float)pTangents[positionIndex].GetAt(1),(float)pTangents[positionIndex].GetAt(2));
+							cVector3f vPos((float)pTangents[positionIndex][0],(float)pTangents[positionIndex][1],(float)pTangents[positionIndex][2]);
 							mvVertexes[positionIndex].tan = vPos;
 
 
 
 							switch (pTangentLayer->GetReferenceMode()) {
-								case KFbxLayerElement::eDIRECT:
+								case FbxLayerElement::eDIRECT:
 									for (int p = 0; p < 3; ++p)
 										vert.tangent[p] = (float)tangents->GetDirectArray().GetAt( positionIndex )[p];
 									break;
-								case KFbxLayerElement::eINDEX_TO_DIRECT:
+								case FbxLayerElement::eINDEX_TO_DIRECT:
 									{
 										int index = tangents->GetIndexArray().GetAt( positionIndex );
 										for (int p = 0; p < 3; ++p)
@@ -923,12 +916,12 @@ namespace hpl {
 						}
 					}*/
 
-					if ( pTangentLayer->GetReferenceMode() == KFbxLayerElement::eDIRECT )
+					if ( pTangentLayer->GetReferenceMode() == fbxsdk::FbxLayerElement::EReferenceMode::eDirect )
 					{					
 						if(mbLowLog)Log("%s Tangents:\n %s ",GetTabs(alDepth),GetTabs(alDepth));
 						for ( int i = 0; i < (int)mvIndexes.size(); i++)
 						{
-							cVector3f vPos((float)pTangents[i].GetAt(0),(float)pTangents[i].GetAt(1),(float)pTangents[i].GetAt(2));
+							cVector3f vPos((float)pTangents[i][0],(float)pTangents[i][1],(float)pTangents[i][2]);
 							mvVertexes[mvIndexes[i]].tan = vPos;
 						}
 					}
@@ -942,7 +935,7 @@ namespace hpl {
 					{
 						int VtxPos = mvIndexes[i];
 						int lPos = pTangentIndices[VtxPos];
-						cVector3f vPos((float)pTangents[lPos].GetAt(0),(float)pTangents[lPos].GetAt(1),(float)pTangents[lPos].GetAt(2));
+						cVector3f vPos((float)pTangents[lPos][0],(float)pTangents[lPos][1],(float)pTangents[lPos][2]);
 						
 						
 						mvVertexes[VtxPos].tan = vPos;
@@ -955,46 +948,46 @@ namespace hpl {
 
 			//////////////////////////////////////////////////////
 			//UV coords.
-			KFbxLayerElementUV *pUvLayer = pLayer->GetUVs();
+			fbxsdk::FbxLayerElementUV *pUvLayer = pLayer->GetUVs();
 
 			if(pUvLayer)
 			{
 
-				KFbxLayerElementUV::DirectArrayType pUvs = pUvLayer->GetDirectArray();
-				KFbxLayerElementArrayTemplate<int> pUvIndices = pUvLayer->GetIndexArray();
+				fbxsdk::FbxLayerElementUV::DirectArrayType pUvs = pUvLayer->GetDirectArray();
+				fbxsdk::FbxLayerElementArrayTemplate<int> pUvIndices = pUvLayer->GetIndexArray();
 
 				if(mbLog)Log("%s UV mapping mode: %d \n",GetTabs(alDepth), pUvLayer->GetMappingMode());
 				if(mbLog)Log("%s UV reference mode: %d \n",GetTabs(alDepth), pUvLayer->GetReferenceMode());
 
 				//One UV for each position
-				if(pUvLayer->GetMappingMode() == KFbxLayerElementNormal::eBY_CONTROL_POINT)
+				if(pUvLayer->GetMappingMode() == fbxsdk::FbxLayerElementNormal::EMappingMode::eByControlPoint)
 				{
 					if(mbLowLog)Log("%s Uvs:\n %s ",GetTabs(alDepth),GetTabs(alDepth));
 					for(int i=0;i<pMesh->GetControlPointsCount();i++)
 					{
-						if(mbLowLog)Log("(%.1f, %.1f) ", pUvs[i].GetAt(0),pUvs[i].GetAt(1));
+						if(mbLowLog)Log("(%.1f, %.1f) ", pUvs[i][0],pUvs[i][1]);
 						if(mbLowLog)if(i != pMesh->GetControlPointsCount()-1)Log(", ");
 
 						//Invert y sicne it uses a another coord system
-						cVector3f vPos(	(float)pUvs[i].GetAt(0),
-							1.0f -(float)pUvs[i].GetAt(1),0);
+						cVector3f vPos(	(float)pUvs[i][0],
+							1.0f -(float)pUvs[i][1],0);
 
 						mvVertexes[i].tex = vPos;
 					}
 					if(mbLog)Log("\n");
 				}
 				//One UV for each vertex, find what vertex the index belongs to.
-				else if(pUvLayer->GetMappingMode() == KFbxLayerElementNormal::eBY_POLYGON_VERTEX)
+				else if(pUvLayer->GetMappingMode() == fbxsdk::FbxLayerElementNormal::EMappingMode::eByPolygonVertex)
 				{
 					if(mbLowLog)Log("%s Uvs:\n %s ",GetTabs(alDepth),GetTabs(alDepth));
 					for(int i=0;i<(int)mvIndexes.size();i++)
 					{
 						int lPos = pUvIndices[i];
-						if(mbLowLog)Log("(%.1f, %.1f) ", pUvs[lPos].GetAt(0),pUvs[lPos].GetAt(1));
+						if(mbLowLog)Log("(%.1f, %.1f) ", pUvs[lPos][0],pUvs[lPos][1]);
 
 						//Invert y sicne it uses a another coord system
-						cVector3f vPos(	(float)pUvs[lPos].GetAt(0),
-							1.0f -(float)pUvs[lPos].GetAt(1),0);
+						cVector3f vPos(	(float)pUvs[lPos][0],
+							1.0f -(float)pUvs[lPos][1],0);
 
 						int VtxPos = mvIndexes[i];
 
@@ -1076,29 +1069,29 @@ namespace hpl {
 
 			//////////////////////////////////////////////////////
 			//Material
-			KFbxLayerElementMaterial *pMaterialLayer = pLayer->GetMaterials();
+			fbxsdk::FbxLayerElementMaterial *pMaterialLayer = pLayer->GetMaterials();
 
 			if(pMaterialLayer)
 			{
-				if(pMaterialLayer->GetMappingMode() != KFbxLayerElementMaterial::eALL_SAME)
+				if(pMaterialLayer->GetMappingMode() != fbxsdk::FbxLayerElementMaterial::eAllSame)
 				{
 					Error("Per polygon material not supported!\n");
 					return;
 				}
 
-				KFbxLayerElementMaterial::DirectArrayType pMatArray = pMaterialLayer->ParentClass::GetDirectArray();
-				KFbxSurfaceMaterial *pMat = pMatArray.GetAt(0);
+				fbxsdk::FbxLayerElementMaterial::DirectArrayType pMatArray = pMaterialLayer->ParentClass::GetDirectArray();
+				fbxsdk::FbxSurfaceMaterial *pMat = pMatArray[0];
 
 				if(pMat)
 				{
 					// first set the material based on the material name
 					subMeshData.msMaterial = pMat->GetName();
-					//lProperty = pMat->FindProperty(KFbxSurfaceMaterial::sDiffuse);
+					//lProperty = pMat->FindProperty(FbxSurfaceMaterial::sDiffuse);
 
-					if (pMat->GetClassId() == KFbxSurfacePhong::ClassId )
+					if (pMat->GetClassId() == FbxSurfacePhong::ClassId )
 					{
-						fbxDouble3 col = ((KFbxSurfacePhong *)pMat)->Diffuse.Get();
-						fbxDouble1 factor = ((KFbxSurfacePhong *)pMat)->DiffuseFactor.Get();
+						fbxsdk::FbxDouble3 col = ((FbxSurfacePhong *)pMat)->Diffuse.Get();
+						fbxsdk::FbxDouble factor = ((FbxSurfacePhong *)pMat)->DiffuseFactor.Get();
 						for(int i=0;i<(int)mvVertexes.size();i++)
 						{
 							mvVertexes[i].col = cColor((float)col[0],(float)col[1], 
@@ -1115,13 +1108,13 @@ namespace hpl {
 			//////////////////////////////////////////////////////
 			//Texture
 
-			KFbxLayerElementTexture *pTextureLayer = pLayer->GetTextures(KFbxLayerElement::eDIFFUSE_TEXTURES);
+			fbxsdk::FbxLayerElementTexture *pTextureLayer = pLayer->GetTextures(fbxsdk::FbxLayerElement::eTextureDiffuse);
 		
 			if(pUvLayer)
 			{
 				if(pTextureLayer)
 				{
-					KFbxTexture *pTexture = pTextureLayer->GetDirectArray().GetAt(0);
+					FbxTexture *pTexture = pTextureLayer->GetDirectArray()[0];
 					if(pTexture)
 					{
 						subMeshData.msMaterial = cString::SetFileExt(cString::GetFileName(pTexture->GetName()),"");  // replaced GetFileName by GetName, maybe GetUrl or something else?
@@ -1151,9 +1144,9 @@ namespace hpl {
 
 			//What is the difference between source and destination?
 			//Destination gives the right matrix here..hmmm...
-			KFbxMatrix GMtx = apNode->EvaluateGlobalTransform( KTIME_INFINITE, KFbxNode::eSOURCE_SET, false);
+			FbxMatrix GMtx = apNode->EvaluateGlobalTransform( FBXSDK_TIME_INFINITE, fbxsdk::FbxNode::EPivotSet::eSourcePivot, false);
 			//Something else here using rotation and scaling?
-			KFbxMatrix LMtx = apNode->EvaluateLocalTransform(KTIME_INFINITE, KFbxNode::eSOURCE_SET, false);    // again, why no local transform here? todo!
+			FbxMatrix LMtx = apNode->EvaluateLocalTransform(FBXSDK_TIME_INFINITE, fbxsdk::FbxNode::EPivotSet::eSourcePivot, false);    // again, why no local transform here? todo!
 
 			subMeshData.m_mtxGlobal = cMatrixf(&GMtx.Transpose().mData[0][0]);
 			subMeshData.m_mtxLocal = cMatrixf(&LMtx.Transpose().mData[0][0]);
@@ -1189,22 +1182,22 @@ namespace hpl {
 		//Get Links and Skin the bones.
 		if(apSkeleton)
 		{
-			int deformerCount = pMesh->GetDeformerCount( KFbxDeformer::eSKIN );
+			int deformerCount = pMesh->GetDeformerCount( fbxsdk::FbxDeformer::eSkin );
 			if(deformerCount  != 1 ) Error("No or multiple skin deformers assigned to mesh!\n");
 
 			for(int i=0;i<deformerCount;i++)
 			{
-				KFbxSkin * skin = (KFbxSkin *)pMesh->GetDeformer(i, KFbxDeformer::eSKIN);
+				fbxsdk::FbxSkin * skin = (fbxsdk::FbxSkin *)pMesh->GetDeformer(i, fbxsdk::FbxDeformer::eSkin);
 
 				int clusterCount = skin->GetClusterCount();
 
 				for ( int j = 0; j < clusterCount; j++ )
 				{
-					KFbxLink* pLink = skin->GetCluster(j);
+					fbxsdk::FbxCluster* pLink = skin->GetCluster(j);
 
-					KFbxNode* pBoneNode = pLink->GetLink();
+					fbxsdk::FbxNode* pBoneNode = pLink->GetLink();
 
-					KFbxNode* pAssNode = pLink->GetAssociateModel();
+					fbxsdk::FbxNode* pAssNode = pLink->GetAssociateModel();
 					tString sAssName ="None";
 					if(pAssNode)sAssName = pAssNode->GetName();
 
@@ -1217,13 +1210,13 @@ namespace hpl {
 					//Get the bone matrix:
 					cBone* pBone = apSkeleton->GetBoneByName(pBoneNode->GetName());
 
-					KFbxXMatrix mtxTemp;
+					FbxAMatrix mtxTemp;
 					//////////////////////
 					//Get transform of the linking node (bone)
 				
-					KFbxVector4 vTrans, vRot, vScale; 
+					FbxVector4 vTrans, vRot, vScale; 
 
-					KFbxXMatrix transformLinkMatrix, lClusterGeometry;
+					FbxAMatrix transformLinkMatrix, lClusterGeometry;
 					pLink->GetTransformLinkMatrix( transformLinkMatrix );
 
 					// Multiply transformLinkMatrix by Geometric Transformation
@@ -1234,9 +1227,9 @@ namespace hpl {
 					vScale = transformLinkMatrix.GetS();
 					vRot = transformLinkMatrix.GetR();
 					
-					cVector3f vT(vTrans.GetAt(0),vTrans.GetAt(1),vTrans.GetAt(2));
-					cVector3f vS(vScale.GetAt(0),vScale.GetAt(1),vScale.GetAt(2));
-					cVector3f vR(vRot.GetAt(0),vRot.GetAt(1),vRot.GetAt(2));
+					cVector3f vT(vTrans[0],vTrans[1],vTrans[2]);
+					cVector3f vS(vScale[0],vScale[1],vScale[2]);
+					cVector3f vR(vRot[0],vRot[1],vRot[2]);
 				
 					cMatrixf mtxS = cMath::MatrixScale(vS);
 					cMatrixf mtxT = cMath::MatrixTranslate(vT);
@@ -1363,69 +1356,54 @@ namespace hpl {
 		return msTemp.c_str();
 	}
 
-	const char* cMeshLoaderFBX::GetAttrName(KFbxNodeAttribute::EAttributeType alNum)
+	const char* cMeshLoaderFBX::GetAttrName(fbxsdk::FbxNodeAttribute::EType alNum)
 	{
 		switch(alNum)
 		{
-		case KFbxNodeAttribute::eUNIDENTIFIED: return "Unidentified";
-		case KFbxNodeAttribute::eNULL: return "Null";
-		case KFbxNodeAttribute::eMARKER: return "Marker";
-		case KFbxNodeAttribute::eSKELETON: return "Skeleton";
-		case KFbxNodeAttribute::eMESH: return "Mesh"; 
-		case KFbxNodeAttribute::eNURB: return "Nurb"; 
-		case KFbxNodeAttribute::ePATCH: return "Patch"; 
-		case KFbxNodeAttribute::eCAMERA: return "Camera"; 
-		case KFbxNodeAttribute::eCAMERA_SWITCHER: return "CameraSwicther";
-		case KFbxNodeAttribute::eLIGHT: return "Light";
-		case KFbxNodeAttribute::eOPTICAL_REFERENCE: return "Reference";
-		case KFbxNodeAttribute::eOPTICAL_MARKER: return "Marker";
+		case fbxsdk::FbxNodeAttribute::eUnknown: return "Unidentified";
+		case fbxsdk::FbxNodeAttribute::eNull: return "Null";
+		case fbxsdk::FbxNodeAttribute::eMarker: return "Marker";
+		case fbxsdk::FbxNodeAttribute::eSkeleton: return "Skeleton";
+		case fbxsdk::FbxNodeAttribute::eMesh: return "Mesh"; 
+		case fbxsdk::FbxNodeAttribute::eNurbs: return "Nurb"; 
+		case fbxsdk::FbxNodeAttribute::ePatch: return "Patch"; 
+		case fbxsdk::FbxNodeAttribute::eCamera: return "Camera"; 
+		case fbxsdk::FbxNodeAttribute::eCameraSwitcher: return "CameraSwicther";
+		case fbxsdk::FbxNodeAttribute::eLight: return "Light";
+		case fbxsdk::FbxNodeAttribute::eOpticalReference: return "Reference";
+		case fbxsdk::FbxNodeAttribute::eOpticalMarker: return "Marker";
 		}
 
 		return "Uknown";
 	}
 
-	const char*  cMeshLoaderFBX::GetSkelTypeName(KFbxSkeleton::ESkeletonType alNum)
+	const char*  cMeshLoaderFBX::GetSkelTypeName(fbxsdk::FbxSkeleton::EType alNum)
 	{
 		switch(alNum)
 		{
-		case KFbxSkeleton::eROOT: return "Root";
-		case KFbxSkeleton::eLIMB: return "Limb";
-		case KFbxSkeleton::eLIMB_NODE:  return "Limb Node";
-		case KFbxSkeleton::eEFFECTOR:  return "Effector (root)";
+		case fbxsdk::FbxSkeleton::eRoot: return "Root";
+		case fbxsdk::FbxSkeleton::eLimb: return "Limb";
+		case fbxsdk::FbxSkeleton::eLimbNode:  return "Limb Node";
+		case fbxsdk::FbxSkeleton::eEffector:  return "Effector (root)";
 		}
 
 		return "Unknown";
 	}
 
-	const char* cMeshLoaderFBX::GetRotOrderName(ERotationOrder alNum)
+	const char* cMeshLoaderFBX::GetLinkModeName(fbxsdk::FbxCluster::ELinkMode alNum)
 	{
 		switch(alNum)
 		{
-		case eEULER_XYZ: return "X Y Z";
-		case eEULER_XZY: return "X Z Y";
-		case eEULER_YZX: return "Y Z X";
-		case eEULER_YXZ: return "Y X Z";
-		case eEULER_ZXY: return "Z X Y";
-		case eEULER_ZYX:return "Z Y X";
-		case eSPHERIC_XYZ: return "SphereXYZ";
-		}
-		return "Unknown";
-	}
-
-	const char* cMeshLoaderFBX::GetLinkModeName(KFbxLink::ELinkMode alNum)
-	{
-		switch(alNum)
-		{
-		case KFbxLink::eNORMALIZE: return "Normalize";
-		case KFbxLink::eADDITIVE: return "Additive";
-		case KFbxLink::eTOTAL1:  return "TotalOne";
+		case fbxsdk::FbxCluster::ELinkMode::eNormalize: return "Normalize";
+		case fbxsdk::FbxCluster::ELinkMode::eAdditive: return "Additive";
+		case fbxsdk::FbxCluster::ELinkMode::eTotalOne:  return "TotalOne";
 		}
 		return "Unknown";
 	}
 
 	//-----------------------------------------------------------------------
 
-	bool cMeshLoaderFBX::LoadScene(KFbxSdkManager* pSdkManager, KFbxDocument* pScene, const char* pFilename)
+	bool cMeshLoaderFBX::LoadScene(fbxsdk::FbxManager* pSdkManager, FbxDocument* pScene, const char* pFilename)
 	{
 		int lFileMajor, lFileMinor, lFileRevision;
 		int lSDKMajor,  lSDKMinor,  lSDKRevision;
@@ -1435,10 +1413,10 @@ namespace hpl {
 		char lPassword[1024];
 
 		// Get the file version number generate by the FBX SDK.
-		KFbxSdkManager::GetFileFormatVersion(lSDKMajor, lSDKMinor, lSDKRevision);
+		fbxsdk::FbxManager::GetFileFormatVersion(lSDKMajor, lSDKMinor, lSDKRevision);
 
 		// Create an importer.
-		KFbxImporter* lImporter = KFbxImporter::Create(pSdkManager,"");
+		fbxsdk::FbxImporter* lImporter = fbxsdk::FbxImporter::Create(pSdkManager,"");
 
 		// Initialize the importer by providing a filename.
 		const bool lImportStatus = lImporter->Initialize(pFilename, -1, pSdkManager->GetIOSettings());
@@ -1446,11 +1424,10 @@ namespace hpl {
 
 		if( !lImportStatus )
 		{
-			printf("Call to KFbxImporter::Initialize() failed.\n");
-			printf("Error returned: %s\n\n", lImporter->GetLastErrorString());
+			printf("Call to FbxImporter::Initialize() failed.\n");
+			printf("Error returned: %s\n\n", lImporter->GetStatus().GetErrorString());
 
-			if (lImporter->GetLastErrorID() == KFbxIO::eFILE_VERSION_NOT_SUPPORTED_YET ||
-				lImporter->GetLastErrorID() == KFbxIO::eFILE_VERSION_NOT_SUPPORTED_ANYMORE)
+			if (lImporter->GetStatus().GetCode() == fbxsdk::FbxStatus::EStatusCode::eInvalidFileVersion)
 			{
 				printf("FBX version number for this FBX SDK is %d.%d.%d\n", lSDKMajor, lSDKMinor, lSDKRevision);
 				printf("FBX version number for file %s is %d.%d.%d\n\n", pFilename, lFileMajor, lFileMinor, lFileRevision);
@@ -1478,7 +1455,7 @@ namespace hpl {
 
 			for(i = 0; i < lAnimStackCount; i++)
 			{
-				KFbxTakeInfo* lTakeInfo = lImporter->GetTakeInfo(i);
+				fbxsdk::FbxTakeInfo* lTakeInfo = lImporter->GetTakeInfo(i);
 
 				printf("    Animation Stack %d\n", i);
 				printf("         Name: \"%s\"\n", lTakeInfo->mName.Buffer());
@@ -1508,21 +1485,21 @@ namespace hpl {
 		// Import the scene.
 		lStatus = lImporter->Import(pScene);
 
-		if(lStatus == false && lImporter->GetLastErrorID() == KFbxIO::ePASSWORD_ERROR)
+		if(lStatus == false && lImporter->GetStatus().GetCode() == fbxsdk::FbxStatus::EStatusCode::ePasswordError)
 		{
 			printf("Please enter password: ");
 
 			lPassword[0] = '\0';
 
 			scanf("%s", lPassword);
-			KString lString(lPassword);
+			fbxsdk::FbxString lString(lPassword);
 
 			IOS_REF.SetStringProp(IMP_FBX_PASSWORD,      lString);
 			IOS_REF.SetBoolProp(IMP_FBX_PASSWORD_ENABLE, true);
 
 			lStatus = lImporter->Import(pScene);
 
-			if(lStatus == false && lImporter->GetLastErrorID() == KFbxIO::ePASSWORD_ERROR)
+			if(lStatus == false && lImporter->GetStatus().GetCode() == fbxsdk::FbxStatus::EStatusCode::ePasswordError)
 			{
 				printf("\nPassword is wrong, import aborted.\n");
 			}
