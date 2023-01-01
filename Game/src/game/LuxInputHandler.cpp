@@ -720,12 +720,14 @@ cVector2f cLuxInputHandler::GetSluggishMousePos(const cVector2f& avRelPosMouse)
 
 //-----------------------------------------------------------------------
 
-#ifdef USE_GAMEPAD
 bool cLuxInputHandler::IsGamepadPresent()
 {
+#ifdef USE_GAMEPAD
 	return mpPad!=NULL;
-}
+#else
+	return false;
 #endif
+}
 
 //-----------------------------------------------------------------------
 

@@ -515,9 +515,9 @@ void cLuxEnemyMover::UpdateMoveAnimation(float afTimeStep)
 
 	//Log("Update move anim. Speed: %f Current: %d\n", fSpeed, mMoveState);
 
-	bool bCanJog = mpEnemy->mfWalkToJogSpeed>0 && mpEnemy->mfRunToJogSpeed>0 && mpEnemy->GetJogAnimationName()!="";
-	
 	eLuxEnemyPoseType pose = mpEnemy->mCurrentPose;
+
+	bool bCanJog = mpEnemy->mfWalkToJogSpeed[pose] > 0 && mpEnemy->mfRunToJogSpeed[pose] > 0 && mpEnemy->GetJogAnimationName() != "";
 
 	////////////////////////////////
 	// Move state animation
