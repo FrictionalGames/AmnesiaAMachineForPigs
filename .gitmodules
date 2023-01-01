@@ -1,0 +1,3 @@
+[submodule "HPL2"]
+	path = HPL2
+	url = git@github.com:dima424658/HPL2Engine

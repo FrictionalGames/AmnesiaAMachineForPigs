@@ -1,3 +1,0 @@
-AppName MaterialEditor
-OutHeaderPath .
-OutSourcePath .

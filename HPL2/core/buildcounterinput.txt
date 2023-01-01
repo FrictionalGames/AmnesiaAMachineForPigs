@@ -1,5 +1,0 @@
-AppName HPL2_0
-LocalPath ../core
-ProjectIncludePath include
-OutHeaderPath .
-OutSourcePath sources
