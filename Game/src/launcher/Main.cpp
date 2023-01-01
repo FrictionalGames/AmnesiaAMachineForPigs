@@ -28,14 +28,8 @@
 #endif
 #include <GL/gl.h>
 #include <GL/glu.h>
-#if USE_SDL2
-#include <SDL2/SDL.h>
-#elif defined WIN32
-#include "glut.h"
-#elif defined __linux__
-#include <GL/glx.h>
-#endif
 
+#include <SDL2/SDL.h>
 
 using namespace hpl;
 
@@ -97,11 +91,8 @@ bool InitPaths(const tWString& asInitConfigFile)
 	
 	
 	//Get the config file paths
-#if USE_SDL2
 	gsDefaultMainConfigPath = pInitCfg->GetStringW("ConfigFiles", "DefaultMainSettingsSDL2",_W(""));
-#else
-	gsDefaultMainConfigPath = pInitCfg->GetStringW("ConfigFiles", "DefaultMainSettings",_W(""));
-#endif
+
 
 	// Get presets paths
 	gsDefaultMainConfigPathLow = pInitCfg->GetStringW("ConfigFiles", "DefaultMainSettingsLow",_W(""));
@@ -223,9 +214,6 @@ bool LoadLanguage(cEngine* apEngine, const tString& asName, bool abForceReload)
 	return true;
 }
 
-#if USE_SDL2
-#include <SDL2/SDL.h>
-
 tString SDL2GetRenderer() {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -247,81 +235,7 @@ tString SDL2GetRenderer() {
     SDL_DestroyWindow(sdlwin);
     return ret;
 }
-#elif defined __linux__
-tString LinuxGetRenderer() {
-	Display *dpy = XOpenDisplay(NULL);
-	if (!dpy) {
-		fprintf(stderr, "Error: unable to open the display %s\n", XDisplayName(NULL));
-		return "";
-	}
 
-	int attributeSingle[] = {
-		GLX_RGBA,
-		GLX_RED_SIZE, 1,
-		GLX_GREEN_SIZE, 1,
-		GLX_BLUE_SIZE, 1,
-		None };
-	int attributeDouble[] = {
-		GLX_RGBA,
-		GLX_RED_SIZE, 1,
-		GLX_GREEN_SIZE, 1,
-		GLX_BLUE_SIZE, 1,
-		GLX_DOUBLEBUFFER,
-		None };
-
-	XVisualInfo *visinfo;
-	GLXContext ctx = NULL;
-
-	visinfo = glXChooseVisual(dpy,0, attributeSingle);
-	if (!visinfo)
-		visinfo = glXChooseVisual(dpy, 0, attributeDouble);
-
-	if (visinfo)
-		ctx = glXCreateContext(dpy, visinfo, NULL, True);
-
-	if (!visinfo) {
-		fprintf(stderr, "Error: couldn't find RGB GLX visual\n");
-		return "";
-	}
-
-	if (!ctx) {
-		fprintf(stderr, "Error: glXCreateContext failed\n");
-		XFree(visinfo);
-		return "";
-	}
-
-	XSetWindowAttributes attr;
-	unsigned long mask;
-	Window root, win;
-	int width = 100, height = 100;
-
-	root = RootWindow(dpy, 0);
-
-	attr.background_pixel = 0;
-	attr.border_pixel = 0;
-	attr.colormap = XCreateColormap(dpy, root, visinfo->visual, AllocNone);
-	attr.event_mask = StructureNotifyMask | ExposureMask;
-	mask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
-	win = XCreateWindow(dpy, root, 0, 0, width, height,
-						0, visinfo->depth, InputOutput,
-						visinfo->visual, mask, &attr);
-
-	tString ret = "";
-	if (glXMakeCurrent(dpy, win, ctx)) {
-		const char *pCardString = (const char *)glGetString(GL_RENDERER);
-		if (pCardString) {
-			ret = tString(pCardString);
-		}
-	}
-
-	glXDestroyContext(dpy, ctx);
-	XFree(visinfo);
-	XDestroyWindow(dpy, win);
-	XCloseDisplay(dpy);
-
-	return ret;
-}
-#endif
 //--------------------------------------------------------------------------------
 
 int hplMain(const tString &asCommandLine)
@@ -341,23 +255,7 @@ int hplMain(const tString &asCommandLine)
 	// Create video card database handler
 	cQualityChooser* pChooser = hplNew(cQualityChooser,("launcher/launcher_card_database.cfg"));
 
-#if USE_SDL2
     tString sCardString = SDL2GetRenderer();
-#elif defined WIN32
-	// Temp GLUT retrieval of the card string.
-	int argc = 1;
-	char *argv[] = { "" };
-	glutInit(&argc, argv);
-	glutInitDisplayMode( GLUT_RGB | GLUT_DOUBLE);
-	int lWin = glutCreateWindow("");
-	const GLubyte* pCardString = glGetString(GL_RENDERER);
-	tString sCardString;
-	if(pCardString)
-		sCardString = tString((const char*)pCardString);
-	glutDestroyWindow(lWin);
-#elif defined(__linux__)
-	tString sCardString = LinuxGetRenderer();
-#endif
 
 	tWString sConfigFilePath = gsBaseSavePath + _W("main_settings.cfg");
 

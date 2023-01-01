@@ -56,7 +56,6 @@ cLuxHintHandler::cLuxHintHandler() : iLuxUpdateable("LuxHintHandler")
 		mpGamepadButtonIcon[i] = NULL;
 	}
 
-# if USE_SDL2
     mpGamepadButtonIcon[eGamepadButton_A]             = pGui->CreateGfxTexture("gamepad_a.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
 	mpGamepadButtonIcon[eGamepadButton_B]             = pGui->CreateGfxTexture("gamepad_b.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
 	mpGamepadButtonIcon[eGamepadButton_X]             = pGui->CreateGfxTexture("gamepad_x.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
@@ -71,27 +70,6 @@ cLuxHintHandler::cLuxHintHandler() : iLuxUpdateable("LuxHintHandler")
 	mpGamepadButtonIcon[eGamepadButton_DpadRight]     = pGui->CreateGfxTexture("gamepad_dpad_r.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
 	mpGamepadButtonIcon[eGamepadButton_DpadLeft]      = pGui->CreateGfxTexture("gamepad_dpad_l.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
 	mpGamepadButtonIcon[eGamepadButton_DpadDown]      = pGui->CreateGfxTexture("gamepad_dpad_d.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-# else
-	//////////////
-	// Set up the buttons
-	mpGamepadButtonIcon[eGamepadButton_0] = pGui->CreateGfxTexture("gamepad_a.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadButtonIcon[eGamepadButton_1] = pGui->CreateGfxTexture("gamepad_b.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadButtonIcon[eGamepadButton_2] = pGui->CreateGfxTexture("gamepad_x.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadButtonIcon[eGamepadButton_3] = pGui->CreateGfxTexture("gamepad_y.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadButtonIcon[eGamepadButton_4] = pGui->CreateGfxTexture("gamepad_lb.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadButtonIcon[eGamepadButton_5] = pGui->CreateGfxTexture("gamepad_rb.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadButtonIcon[eGamepadButton_6] = pGui->CreateGfxTexture("gamepad_select.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadButtonIcon[eGamepadButton_7] = pGui->CreateGfxTexture("gamepad_start.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadButtonIcon[eGamepadButton_8] = pGui->CreateGfxTexture("gamepad_ls.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadButtonIcon[eGamepadButton_9] = pGui->CreateGfxTexture("gamepad_rs.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-
-	//////////
-	// Dpad
-	mpGamepadHatIcon[cMath::Log2ToInt(eGamepadHatState_Up)]    = pGui->CreateGfxTexture("gamepad_dpad_u.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadHatIcon[cMath::Log2ToInt(eGamepadHatState_Right)] = pGui->CreateGfxTexture("gamepad_dpad_r.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadHatIcon[cMath::Log2ToInt(eGamepadHatState_Left)]  = pGui->CreateGfxTexture("gamepad_dpad_l.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGamepadHatIcon[cMath::Log2ToInt(eGamepadHatState_Down)]  = pGui->CreateGfxTexture("gamepad_dpad_d.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-# endif
 
 	////////
 	// Triggers
@@ -103,14 +81,8 @@ cLuxHintHandler::cLuxHintHandler() : iLuxUpdateable("LuxHintHandler")
 		mpGampadAxisIcon[i * 2 + 1] = NULL;
 	}
 
-# if USE_SDL2
 	mpGampadAxisIcon[eGamepadAxis_LeftTrigger * 2 + eGamepadAxisRange_Positive - 1]  = pGui->CreateGfxTexture("gamepad_lt.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
 	mpGampadAxisIcon[eGamepadAxis_RightTrigger * 2 + eGamepadAxisRange_Positive - 1] = pGui->CreateGfxTexture("gamepad_rt.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-#else
-	mpGampadAxisIcon[eGamepadAxis_2 * 2 + eGamepadAxisRange_Positive - 1] = pGui->CreateGfxTexture("gamepad_lt.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-	mpGampadAxisIcon[eGamepadAxis_2 * 2 + eGamepadAxisRange_Negative - 1] = pGui->CreateGfxTexture("gamepad_rt.tga", eGuiMaterial_Alpha, eTextureType_2D, cColor(1,1), false);
-#endif
-
 #endif
 }
 

@@ -45,7 +45,7 @@ Now create our build folders and setup cmake
 
 mkdir build
 cd build
-cmake ../ -DCMAKE_BUILD_TYPE=Release -DUSE_SDL2=ON
+cmake ../ -DCMAKE_BUILD_TYPE=Release
 cd ..
 
 now we can exit the chroot.

@@ -10,8 +10,6 @@ link_directories(
     ${DEP_LIB_DIR}
 )
 
-add_definitions(-DUSE_SDL2)
-
 add_executable(Launcher launcher.cpp Main.cpp QualityChooser.cpp LauncherHelper.cpp)
 target_link_libraries(Launcher HPL2 fltk_images Xinerama Xfixes Xcursor Xrender fltk Xext X11 Xft fontconfig jpeg)
 

@@ -22,8 +22,6 @@
 #include <algorithm>
 #include <cctype>
 
-#include "FL/fl_ask.H"
-
 //-----------------------------------------------------------
 
 int cVideoCardSeries::GetNumericDifference(const tString& asCode, int alNumericCount)

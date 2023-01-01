@@ -840,11 +840,7 @@ bool cLuxInputMenuEntry::InputEntryGamepadButtonPress(iWidget* apWidget, const c
 	if(IsWaiting())
 	{
 		if(aData.mGamepadInputData.mfInputValue==0.0f) return false;
-#if USE_SDL2
 		if(aData.mGamepadInputData.mInputType == eGamepadInputType_Button && aData.mGamepadInputData.mlInputId == eGamepadButton_B)
-#else
-		if(aData.mGamepadInputData.mInputType == eGamepadInputType_Button && aData.mGamepadInputData.mlInputId == eGamepadButton_1)
-#endif
 		{
 			//////////
 			// Cancel when pressing B
