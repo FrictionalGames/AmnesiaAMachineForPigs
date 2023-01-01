@@ -153,13 +153,6 @@ void cLuxScriptHandler::OnDraw(float afFrameTime)
 
 //-----------------------------------------------------------------------
 
-void cLuxScriptHandler::AddFunc(const tString& asFunc, void *apFuncPtr)
-{
-	mpLowLevelSystem->AddScriptFunc(asFunc,apFuncPtr);
-}
-
-//-----------------------------------------------------------------------
-
 static iLuxArea* ToArea(iLuxEntity *apEntity)
 {
 	return static_cast<iLuxArea*>(apEntity);
@@ -405,352 +398,354 @@ iLuxEntity* cLuxScriptHandler::GetEntity(const tString& asName, eLuxEntityType a
 
 //-----------------------------------------------------------------------
 
+#define AddFunc(name, ptr) AddFuncInternal(name, gw::id(&cLuxScriptHandler::ptr).template f< &cLuxScriptHandler::ptr >())
+
 void cLuxScriptHandler::InitScriptFunctions()
 {
-	AddFunc("void Print(string &in asString)", (void *)Print);
-	AddFunc("void AddDebugMessage(string &in asString, bool abCheckForDuplicates)",(void *)AddDebugMessage);
-	AddFunc("void ProgLog(string &in asLevel, string &in asMessage)", (void *)ProgLog);
-	AddFunc("bool ScriptDebugOn()",(void *)ScriptDebugOn);
+	AddFunc("void Print(string &in asString)", Print);
+	AddFunc("void AddDebugMessage(string &in asString, bool abCheckForDuplicates)",AddDebugMessage);
+	AddFunc("void ProgLog(string &in asLevel, string &in asMessage)", ProgLog);
+	AddFunc("bool ScriptDebugOn()",ScriptDebugOn);
 
-	AddFunc("float RandFloat(float afMin, float afMax)",(void *)RandFloat);
-	AddFunc("int RandInt(int alMin, int alMax)",(void *)RandInt);
-	AddFunc("bool StringContains(string &in asString, string &in asSubString)", (void *)StringContains);
-	AddFunc("string& StringSub(string &in asString, int alStart, int alCount)", (void *)StringSub);
+	AddFunc("float RandFloat(float afMin, float afMax)",RandFloat);
+	AddFunc("int RandInt(int alMin, int alMax)",RandInt);
+	AddFunc("bool StringContains(string &in asString, string &in asSubString)", StringContains);
+	AddFunc("string& StringSub(string &in asString, int alStart, int alCount)", StringSub);
 
-	AddFunc("void AddTimer(string &in asName, float afTime, string &in asFunction)",(void *)AddTimer);
-	AddFunc("void RemoveTimer(string &in asName)",(void *)RemoveTimer);
-	AddFunc("float GetTimerTimeLeft(string &in asName)",(void *)GetTimerTimeLeft);
+	AddFunc("void AddTimer(string &in asName, float afTime, string &in asFunction)",AddTimer);
+	AddFunc("void RemoveTimer(string &in asName)",RemoveTimer);
+	AddFunc("float GetTimerTimeLeft(string &in asName)",GetTimerTimeLeft);
 
-	AddFunc("void SetLocalVarInt(string &in asName, int alVal)",(void *)SetLocalVarInt);
-	AddFunc("void SetLocalVarFloat(string &in asName, float afVal)",(void *)SetLocalVarFloat);
-	AddFunc("void SetLocalVarString(string &in asName, string &in asVal)",(void *)SetLocalVarString);
+	AddFunc("void SetLocalVarInt(string &in asName, int alVal)",SetLocalVarInt);
+	AddFunc("void SetLocalVarFloat(string &in asName, float afVal)",SetLocalVarFloat);
+	AddFunc("void SetLocalVarString(string &in asName, string &in asVal)",SetLocalVarString);
 	
-	AddFunc("void AddLocalVarInt(string &in asName, int alVal)",(void *)AddLocalVarInt);
-	AddFunc("void AddLocalVarFloat(string &in asName, float afVal)",(void *)AddLocalVarFloat);
-	AddFunc("void AddLocalVarString(string &in asName, string &in asVal)",(void *)AddLocalVarString);
+	AddFunc("void AddLocalVarInt(string &in asName, int alVal)",AddLocalVarInt);
+	AddFunc("void AddLocalVarFloat(string &in asName, float afVal)",AddLocalVarFloat);
+	AddFunc("void AddLocalVarString(string &in asName, string &in asVal)",AddLocalVarString);
 
-	AddFunc("int GetLocalVarInt(string &in asName)",(void *)GetLocalVarInt);
-	AddFunc("float GetLocalVarFloat(string &in asName)",(void *)GetLocalVarFloat);
-	AddFunc("string& GetLocalVarString(string &in asName)",(void *)GetLocalVarString);
+	AddFunc("int GetLocalVarInt(string &in asName)",GetLocalVarInt);
+	AddFunc("float GetLocalVarFloat(string &in asName)",GetLocalVarFloat);
+	AddFunc("string& GetLocalVarString(string &in asName)",GetLocalVarString);
 
-	AddFunc("void SetGlobalVarInt(string &in asName, int alVal)",(void *)SetGlobalVarInt);
-	AddFunc("void SetGlobalVarFloat(string &in asName, float afVal)",(void *)SetGlobalVarFloat);
-	AddFunc("void SetGlobalVarString(string &in asName, string &in asVal)",(void *)SetGlobalVarString);
+	AddFunc("void SetGlobalVarInt(string &in asName, int alVal)",SetGlobalVarInt);
+	AddFunc("void SetGlobalVarFloat(string &in asName, float afVal)",SetGlobalVarFloat);
+	AddFunc("void SetGlobalVarString(string &in asName, string &in asVal)",SetGlobalVarString);
 
-	AddFunc("void AddGlobalVarInt(string &in asName, int alVal)",(void *)AddGlobalVarInt);
-	AddFunc("void AddGlobalVarFloat(string &in asName, float afVal)",(void *)AddGlobalVarFloat);
-	AddFunc("void AddGlobalVarString(string &in asName, string &in asVal)",(void *)AddGlobalVarString);
+	AddFunc("void AddGlobalVarInt(string &in asName, int alVal)",AddGlobalVarInt);
+	AddFunc("void AddGlobalVarFloat(string &in asName, float afVal)",AddGlobalVarFloat);
+	AddFunc("void AddGlobalVarString(string &in asName, string &in asVal)",AddGlobalVarString);
 
-	AddFunc("int GetGlobalVarInt(string &in asName)",(void *)GetGlobalVarInt);
-	AddFunc("float GetGlobalVarFloat(string &in asName)",(void *)GetGlobalVarFloat);
-	AddFunc("string& GetGlobalVarString(string &in asName)",(void *)GetGlobalVarString);
+	AddFunc("int GetGlobalVarInt(string &in asName)",GetGlobalVarInt);
+	AddFunc("float GetGlobalVarFloat(string &in asName)",GetGlobalVarFloat);
+	AddFunc("string& GetGlobalVarString(string &in asName)",GetGlobalVarString);
 
-	AddFunc("void StartCredits(string &in asMusic, bool abLoopMusic, string &in asTextCat, string &in asTextEntry, int alEndNum)",(void *)StartCredits);
-	AddFunc("void AddKeyPart(int alKeyPart)", (void *)AddKeyPart);
+	AddFunc("void StartCredits(string &in asMusic, bool abLoopMusic, string &in asTextCat, string &in asTextEntry, int alEndNum)",StartCredits);
+	AddFunc("void AddKeyPart(int alKeyPart)", AddKeyPart);
 
-	AddFunc("void StartDemoEnd()",(void *)StartDemoEnd);
+	AddFunc("void StartDemoEnd()",StartDemoEnd);
 
-	AddFunc("void AutoSave()", (void *)AutoSave);
-	AddFunc("void CheckPoint(string &in asName,string &in asStartPos ,string &in asCallback, string &in asDeathHintCat, string &in asDeathHintEntry, bool abPlayerDark)", (void *)CheckPoint);
-	AddFunc("void ReleasePlayerFromLimbo()", (void *)ReleasePlayerFromLimbo);
+	AddFunc("void AutoSave()", AutoSave);
+	AddFunc("void CheckPoint(string &in asName,string &in asStartPos ,string &in asCallback, string &in asDeathHintCat, string &in asDeathHintEntry, bool abPlayerDark)", CheckPoint);
+	AddFunc("void ReleasePlayerFromLimbo()", ReleasePlayerFromLimbo);
 
-	AddFunc("void ChangeMap(string &in asMapName, string &in asStartPos, string &in asStartSound, string &in asEndSound)",(void *)ChangeMap);
-	AddFunc("void ClearSavedMaps()",(void *)ClearSavedMaps);
-	AddFunc("void CreateDataCache()",(void *)CreateDataCache);
-	AddFunc("void DestroyDataCache()",(void *)DestroyDataCache);
-	AddFunc("void SetMapDisplayNameEntry(string &in asNameEntry)",(void *)SetMapDisplayNameEntry);
-	AddFunc("void SetSkyBoxActive(bool abActive)",(void *)SetSkyBoxActive);
-	AddFunc("void SetSkyBoxTexture(string &in asTexture)",(void *)SetSkyBoxTexture);
-	AddFunc("void SetSkyBoxColor(float afR, float afG, float afB, float afA)",(void *)SetSkyBoxColor);
+	AddFunc("void ChangeMap(string &in asMapName, string &in asStartPos, string &in asStartSound, string &in asEndSound)",ChangeMap);
+	AddFunc("void ClearSavedMaps()",ClearSavedMaps);
+	AddFunc("void CreateDataCache()",CreateDataCache);
+	AddFunc("void DestroyDataCache()",DestroyDataCache);
+	AddFunc("void SetMapDisplayNameEntry(string &in asNameEntry)",SetMapDisplayNameEntry);
+	AddFunc("void SetSkyBoxActive(bool abActive)",SetSkyBoxActive);
+	AddFunc("void SetSkyBoxTexture(string &in asTexture)",SetSkyBoxTexture);
+	AddFunc("void SetSkyBoxColor(float afR, float afG, float afB, float afA)",SetSkyBoxColor);
       
-	AddFunc("void UnlockAchievement(string &in asName)", (void *)UnlockAchievement);
+	AddFunc("void UnlockAchievement(string &in asName)", UnlockAchievement);
 
-	AddFunc("void SetFogActive(bool abActive)",(void *)SetFogActive);
-	AddFunc("void SetFogColor(float afR, float afG, float afB, float afA)",(void *)SetFogColor);
-	AddFunc("void SetFogProperties(float afStart, float afEnd, float afFalloffExp, bool abCulling)",(void *)SetFogProperties);
+	AddFunc("void SetFogActive(bool abActive)",SetFogActive);
+	AddFunc("void SetFogColor(float afR, float afG, float afB, float afA)",SetFogColor);
+	AddFunc("void SetFogProperties(float afStart, float afEnd, float afFalloffExp, bool abCulling)",SetFogProperties);
 
-	AddFunc("void SetupLoadScreen(string &in asTextCat, string &in asTextEntry, int alRandomNum, string &in asImageFile)",(void *)SetupLoadScreen);
+	AddFunc("void SetupLoadScreen(string &in asTextCat, string &in asTextEntry, int alRandomNum, string &in asImageFile)",SetupLoadScreen);
 	
-	AddFunc("void FadeIn(float afTime)",(void *)FadeIn);
-	AddFunc("void FadeOut(float afTime)",(void *)FadeOut);
-	AddFunc("void FadeImageTrailTo(float afAmount, float afSpeed)",(void *)FadeImageTrailTo);
-	AddFunc("void FadeSepiaColorTo(float afAmount, float afSpeed)",(void *)FadeSepiaColorTo);
-	AddFunc("void FadeRadialBlurTo(float afSize, float afSpeed)",(void *)FadeRadialBlurTo);
-	AddFunc("void SetRadialBlurStartDist(float afStartDist)",(void *)SetRadialBlurStartDist);
+	AddFunc("void FadeIn(float afTime)",FadeIn);
+	AddFunc("void FadeOut(float afTime)",FadeOut);
+	AddFunc("void FadeImageTrailTo(float afAmount, float afSpeed)",FadeImageTrailTo);
+	AddFunc("void FadeSepiaColorTo(float afAmount, float afSpeed)",FadeSepiaColorTo);
+	AddFunc("void FadeRadialBlurTo(float afSize, float afSpeed)",FadeRadialBlurTo);
+	AddFunc("void SetRadialBlurStartDist(float afStartDist)",SetRadialBlurStartDist);
 
-	AddFunc("void StartEffectFlash(float afFadeIn, float afWhite, float afFadeOut)",(void *)StartEffectFlash);
-	AddFunc("void StartEffectEmotionFlash(string &in asTextCat, string &in asTextEntry, string &in asSound)",(void *)StartEffectEmotionFlash);
+	AddFunc("void StartEffectFlash(float afFadeIn, float afWhite, float afFadeOut)",StartEffectFlash);
+	AddFunc("void StartEffectEmotionFlash(string &in asTextCat, string &in asTextEntry, string &in asSound)",StartEffectEmotionFlash);
 
-	AddFunc("void AddEffectVoice(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, bool abUsePostion,  string &in asPosEnitity, float afMinDistance, float afMaxDistance)",(void *)AddEffectVoice);
-	AddFunc("void AddEffectVoice(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, bool abUsePostion,  string &in asPosEnitity, float afMinDistance, float afMaxDistance, int alPriority, bool abStopInterrupted)",(void *)AddEffectVoiceExt);
+	AddFunc("void AddEffectVoice(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, bool abUsePostion,  string &in asPosEnitity, float afMinDistance, float afMaxDistance)",AddEffectVoice);
+	AddFunc("void AddEffectVoice(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, bool abUsePostion,  string &in asPosEnitity, float afMinDistance, float afMaxDistance, int alPriority, bool abStopInterrupted)",AddEffectVoiceExt);
 	
-	AddFunc("void AddEffectVoice2(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, bool abUsePostion,  string &in asPosEnitity, float afMinDistance, float afMaxDistance)",(void *)AddEffectVoice2);
-	AddFunc("void AddEffectVoice3(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, bool abUsePostion,  string &in asPosEnitity, float afMinDistance, float afMaxDistance)",(void *)AddEffectVoice3);
-	AddFunc("void AddEffectVoice4(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, string &in asText4Entry, float afText4Delay, bool abUsePostion, string &in asPosEnitity, float afMinDistance, float afMaxDistance)",(void *)AddEffectVoice4);
-	AddFunc("void AddEffectVoice5(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, string &in asText4Entry, float afText4Delay, string &in asText5Entry, float afText5Delay, bool abUsePostion, string &in asPosEnitity, float afMinDistance, float afMaxDistance)",(void *)AddEffectVoice5);
-	AddFunc("void AddEffectVoice6(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, string &in asText4Entry, float afText4Delay, string &in asText5Entry, float afText5Delay, string &in asText6Entry, float afText6Delay, bool abUsePostion, string &in asPosEnitity, float afMinDistance, float afMaxDistance)",(void *)AddEffectVoice6);
-	AddFunc("void AddEffectVoice7(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, string &in asText4Entry, float afText4Delay, string &in asText5Entry, float afText5Delay, string &in asText6Entry, float afText6Delay, string &in asText7Entry, float afText7Delay, bool abUsePostion, string &in asPosEnitity, float afMinDistance, float afMaxDistance)",(void *)AddEffectVoice7);
+	AddFunc("void AddEffectVoice2(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, bool abUsePostion,  string &in asPosEnitity, float afMinDistance, float afMaxDistance)",AddEffectVoice2);
+	AddFunc("void AddEffectVoice3(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, bool abUsePostion,  string &in asPosEnitity, float afMinDistance, float afMaxDistance)",AddEffectVoice3);
+	AddFunc("void AddEffectVoice4(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, string &in asText4Entry, float afText4Delay, bool abUsePostion, string &in asPosEnitity, float afMinDistance, float afMaxDistance)",AddEffectVoice4);
+	AddFunc("void AddEffectVoice5(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, string &in asText4Entry, float afText4Delay, string &in asText5Entry, float afText5Delay, bool abUsePostion, string &in asPosEnitity, float afMinDistance, float afMaxDistance)",AddEffectVoice5);
+	AddFunc("void AddEffectVoice6(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, string &in asText4Entry, float afText4Delay, string &in asText5Entry, float afText5Delay, string &in asText6Entry, float afText6Delay, bool abUsePostion, string &in asPosEnitity, float afMinDistance, float afMaxDistance)",AddEffectVoice6);
+	AddFunc("void AddEffectVoice7(string &in asVoiceFile, string &in asEffectFile, string &in asTextCat, string &in asTextEntry, float afTextDelay, string &in asText2Entry, float afText2Delay, string &in asText3Entry, float afText3Delay, string &in asText4Entry, float afText4Delay, string &in asText5Entry, float afText5Delay, string &in asText6Entry, float afText6Delay, string &in asText7Entry, float afText7Delay, bool abUsePostion, string &in asPosEnitity, float afMinDistance, float afMaxDistance)",AddEffectVoice7);
 
-	AddFunc("void StopAllEffectVoices(float afFadeOutTime)",(void *)StopAllEffectVoices);
-	AddFunc("bool GetEffectVoiceActive()",(void *)GetEffectVoiceActive);
-	AddFunc("void SetEffectVoiceOverCallback(string &in asFunc)", (void *)SetEffectVoiceOverCallback);
-	AddFunc("void StartScreenShake(float afAmount, float afTime, float afFadeInTime,float afFadeOutTime)",(void *)StartScreenShake);
-	AddFunc("bool GetFlashbackIsActive()", (void *)GetFlashbackIsActive);
+	AddFunc("void StopAllEffectVoices(float afFadeOutTime)",StopAllEffectVoices);
+	AddFunc("bool GetEffectVoiceActive()",GetEffectVoiceActive);
+	AddFunc("void SetEffectVoiceOverCallback(string &in asFunc)", SetEffectVoiceOverCallback);
+	AddFunc("void StartScreenShake(float afAmount, float afTime, float afFadeInTime,float afFadeOutTime)",StartScreenShake);
+	AddFunc("bool GetFlashbackIsActive()", GetFlashbackIsActive);
 
-	AddFunc("void ShowScreenImage(string &in asImageName, float afX, float afY, float afScale, bool abUseRelativeCoordinates, float afDuration, float afFadeIn, float afFadeOut)", (void *)ShowScreenImage);
-	AddFunc("void HideScreenImageImmediately()", (void *)HideScreenImageImmediately);
-	AddFunc("void HideScreenImageWithFade(float afFadeOut)", (void *)HideScreenImageWithFade);
+	AddFunc("void ShowScreenImage(string &in asImageName, float afX, float afY, float afScale, bool abUseRelativeCoordinates, float afDuration, float afFadeIn, float afFadeOut)", ShowScreenImage);
+	AddFunc("void HideScreenImageImmediately()", HideScreenImageImmediately);
+	AddFunc("void HideScreenImageWithFade(float afFadeOut)", HideScreenImageWithFade);
 
-//	AddFunc("void SetInsanitySetEnabled(string &in asSet, bool abX)", (void *)SetInsanitySetEnabled);
-//	AddFunc("void StartRandomInsanityEvent()", (void *)StartRandomInsanityEvent);
-//	AddFunc("void InsanityEventIsActive()", (void *)InsanityEventIsActive);
+//	AddFunc("void SetInsanitySetEnabled(string &in asSet, bool abX)", SetInsanitySetEnabled);
+//	AddFunc("void StartRandomInsanityEvent()", StartRandomInsanityEvent);
+//	AddFunc("void InsanityEventIsActive()", InsanityEventIsActive);
 
-	AddFunc("void StartPlayerSpawnPS(string &in asSPSFile)", (void *)StartPlayerSpawnPS);
-	AddFunc("void StopPlayerSpawnPS()", (void *)StartPlayerSpawnPS);
+	AddFunc("void StartPlayerSpawnPS(string &in asSPSFile)", StartPlayerSpawnPS);
+	AddFunc("void StopPlayerSpawnPS()", StartPlayerSpawnPS);
 
-	AddFunc("void PlayGuiSound(string &in asSoundFile, float afVolume)",(void *)PlayGuiSound);
+	AddFunc("void PlayGuiSound(string &in asSoundFile, float afVolume)",PlayGuiSound);
 
-	AddFunc("void SetPlayerActive(bool abActive)",(void *)SetPlayerActive);
-	AddFunc("void ChangePlayerStateToNormal()",(void *)ChangePlayerStateToNormal);
-	AddFunc("void SetPlayerCrouching(bool abCrouch)",(void *)SetPlayerCrouching);
-	AddFunc("void AddPlayerBodyForce(float afX, float afY, float afZ, bool abUseLocalCoords)",(void *)AddPlayerBodyForce);
-	AddFunc("void ShowPlayerCrossHairIcons(bool abX)",(void *)ShowPlayerCrossHairIcons);
+	AddFunc("void SetPlayerActive(bool abActive)",SetPlayerActive);
+	AddFunc("void ChangePlayerStateToNormal()",ChangePlayerStateToNormal);
+	AddFunc("void SetPlayerCrouching(bool abCrouch)",SetPlayerCrouching);
+	AddFunc("void AddPlayerBodyForce(float afX, float afY, float afZ, bool abUseLocalCoords)",AddPlayerBodyForce);
+	AddFunc("void ShowPlayerCrossHairIcons(bool abX)",ShowPlayerCrossHairIcons);
 	
-	AddFunc("void SetInfectionFauxMode(bool abFauxMode)",(void *)SetInfectionFauxMode);
-	AddFunc("void SetPlayerInfection(float afInfection)",(void *)SetPlayerInfection);
-	AddFunc("void AddPlayerInfection(float afInfection)",(void *)AddPlayerInfection);
-	AddFunc("float GetPlayerInfection()",(void *)GetPlayerInfection);
-	AddFunc("void SetPlayerHealth(float afHealth)",(void *)SetPlayerHealth);
-	AddFunc("void AddPlayerHealth(float afHealth)",(void *)AddPlayerHealth);
-	AddFunc("float GetPlayerHealth()",(void *)GetPlayerHealth);
+	AddFunc("void SetInfectionFauxMode(bool abFauxMode)",SetInfectionFauxMode);
+	AddFunc("void SetPlayerInfection(float afInfection)",SetPlayerInfection);
+	AddFunc("void AddPlayerInfection(float afInfection)",AddPlayerInfection);
+	AddFunc("float GetPlayerInfection()",GetPlayerInfection);
+	AddFunc("void SetPlayerHealth(float afHealth)",SetPlayerHealth);
+	AddFunc("void AddPlayerHealth(float afHealth)",AddPlayerHealth);
+	AddFunc("float GetPlayerHealth()",GetPlayerHealth);
 	
-	AddFunc("float GetPlayerSpeed()",(void *)GetPlayerSpeed);
-	AddFunc("float GetPlayerYSpeed()",(void *)GetPlayerYSpeed);
-	AddFunc("void MovePlayerForward(float afAmount)",(void *)MovePlayerForward);
-	AddFunc("void SetPlayerPermaDeathSound(string &in asSound)",(void *)SetPlayerPermaDeathSound);
+	AddFunc("float GetPlayerSpeed()",GetPlayerSpeed);
+	AddFunc("float GetPlayerYSpeed()",GetPlayerYSpeed);
+	AddFunc("void MovePlayerForward(float afAmount)",MovePlayerForward);
+	AddFunc("void SetPlayerPermaDeathSound(string &in asSound)",SetPlayerPermaDeathSound);
 
-	AddFunc("void GiveInfectionDamage(float afAmount, bool abUseEffect)",(void *)GiveInfectionDamage);
+	AddFunc("void GiveInfectionDamage(float afAmount, bool abUseEffect)",GiveInfectionDamage);
 
-	AddFunc("void GivePlayerDamage(float afAmount, string &in asType, bool abSpinHead, bool abLethal)",(void *)GivePlayerDamage);
-	AddFunc("void FadePlayerFOVMulTo(float afX, float afSpeed)",(void *)FadePlayerFOVMulTo);
-	AddFunc("void FadePlayerAspectMulTo(float afX, float afSpeed)",(void *)FadePlayerAspectMulTo);
-	AddFunc("void FadePlayerRollTo(float afX, float afSpeedMul, float afMaxSpeed)",(void *)FadePlayerRollTo);
-	AddFunc("void FadePlayerPitchTo(float afX, float afSpeedMul, float afMaxSpeed)",(void *)FadePlayerPitchTo);
-	AddFunc("void MovePlayerHeadPos(float afX, float afY, float afZ, float afSpeed, float afSlowDownDist)",(void *)MovePlayerHeadPos);
+	AddFunc("void GivePlayerDamage(float afAmount, string &in asType, bool abSpinHead, bool abLethal)",GivePlayerDamage);
+	AddFunc("void FadePlayerFOVMulTo(float afX, float afSpeed)",FadePlayerFOVMulTo);
+	AddFunc("void FadePlayerAspectMulTo(float afX, float afSpeed)",FadePlayerAspectMulTo);
+	AddFunc("void FadePlayerRollTo(float afX, float afSpeedMul, float afMaxSpeed)",FadePlayerRollTo);
+	AddFunc("void FadePlayerPitchTo(float afX, float afSpeedMul, float afMaxSpeed)",FadePlayerPitchTo);
+	AddFunc("void MovePlayerHeadPos(float afX, float afY, float afZ, float afSpeed, float afSlowDownDist)",MovePlayerHeadPos);
 
-	AddFunc("void StartPlayerLookAt(string &in asEntityName, float afSpeedMul, float afMaxSpeed,string &in asAtTargetCallback)",(void *)StartPlayerLookAt);
-	AddFunc("void StopPlayerLookAt()",(void *)StopPlayerLookAt);
+	AddFunc("void StartPlayerLookAt(string &in asEntityName, float afSpeedMul, float afMaxSpeed,string &in asAtTargetCallback)",StartPlayerLookAt);
+	AddFunc("void StopPlayerLookAt()",StopPlayerLookAt);
 
-	AddFunc("void SetPlayerMoveSpeedMul(float afMul)",(void *)SetPlayerMoveSpeedMul);
-	AddFunc("void SetPlayerRunSpeedMul(float afMul)",(void *)SetPlayerRunSpeedMul);
-	AddFunc("void SetPlayerLookSpeedMul(float afMul)",(void *)SetPlayerLookSpeedMul);
-	AddFunc("void SetPlayerJumpDisabled(bool abX)",(void *)SetPlayerJumpDisabled);
-	AddFunc("void SetPlayerCrouchDisabled(bool abX)",(void *)SetPlayerCrouchDisabled);
+	AddFunc("void SetPlayerMoveSpeedMul(float afMul)",SetPlayerMoveSpeedMul);
+	AddFunc("void SetPlayerRunSpeedMul(float afMul)",SetPlayerRunSpeedMul);
+	AddFunc("void SetPlayerLookSpeedMul(float afMul)",SetPlayerLookSpeedMul);
+	AddFunc("void SetPlayerJumpDisabled(bool abX)",SetPlayerJumpDisabled);
+	AddFunc("void SetPlayerCrouchDisabled(bool abX)",SetPlayerCrouchDisabled);
 
-	AddFunc("void TeleportPlayer(string &in asStartPosName)",(void *)TeleportPlayer);
-	AddFunc("void SetLanternActive(bool abX, bool abUseEffects)",(void *)SetLanternActive);
-	AddFunc("bool GetLanternActive()",(void *)GetLanternActive);
-	AddFunc("void SetLanternDisabled(bool abX)",(void *)SetLanternDisabled);
-	AddFunc("void SetLanternLitCallback(string &in asCallback)",(void *)SetLanternLitCallback);
+	AddFunc("void TeleportPlayer(string &in asStartPosName)",TeleportPlayer);
+	AddFunc("void SetLanternActive(bool abX, bool abUseEffects)",SetLanternActive);
+	AddFunc("bool GetLanternActive()",GetLanternActive);
+	AddFunc("void SetLanternDisabled(bool abX)",SetLanternDisabled);
+	AddFunc("void SetLanternLitCallback(string &in asCallback)",SetLanternLitCallback);
 
-	AddFunc("bool GetJournalDisabled()",(void *)GetJournalDisabled);
-	AddFunc("void SetJournalDisabled(bool abX)",(void *)SetJournalDisabled);
+	AddFunc("bool GetJournalDisabled()",GetJournalDisabled);
+	AddFunc("void SetJournalDisabled(bool abX)",SetJournalDisabled);
 
-	AddFunc("void SetLanternFlickerActive(bool abX)",(void *)SetLanternFlickerActive);
+	AddFunc("void SetLanternFlickerActive(bool abX)",SetLanternFlickerActive);
 	
-	AddFunc("void SetMessage(string &in asTextCategory, string &in asTextEntry, float afTime)",(void *)SetMessage);
-	AddFunc("void SetDeathHint(string &in asTextCategory, string &in asTextEntry)",(void *)SetDeathHint);
-	AddFunc("void DisableDeathStartSound()",(void *)DisableDeathStartSound);
+	AddFunc("void SetMessage(string &in asTextCategory, string &in asTextEntry, float afTime)",SetMessage);
+	AddFunc("void SetDeathHint(string &in asTextCategory, string &in asTextEntry)",SetDeathHint);
+	AddFunc("void DisableDeathStartSound()",DisableDeathStartSound);
 
-	AddFunc("void AddNote(string &in asNameAndTextEntry, string &in asImage)",(void *)AddNote);
-	AddFunc("void AddDiary(string &in asNameAndTextEntry, string &in asImage)",(void *)AddDiary);
-	AddFunc("void AddHint(string &in asNameAndTextEntry, string &in asImage)",(void *)AddHint);
-	AddFunc("void ReturnOpenJournal(bool abOpenJournal)",(void *)ReturnOpenJournal);
+	AddFunc("void AddNote(string &in asNameAndTextEntry, string &in asImage)",AddNote);
+	AddFunc("void AddDiary(string &in asNameAndTextEntry, string &in asImage)",AddDiary);
+	AddFunc("void AddHint(string &in asNameAndTextEntry, string &in asImage)",AddHint);
+	AddFunc("void ReturnOpenJournal(bool abOpenJournal)",ReturnOpenJournal);
 
-	AddFunc("void RemoveAllHints()",(void *)RemoveAllHints);
-	AddFunc("void RemoveHint(string &in asNameAndTextEntry)",(void *)RemoveHint);
+	AddFunc("void RemoveAllHints()",RemoveAllHints);
+	AddFunc("void RemoveHint(string &in asNameAndTextEntry)",RemoveHint);
 
-    AddFunc("void StartPhoneRinging(string &in asName)",(void *)StartPhoneRinging);
-    AddFunc("void StopPhoneRinging(string &in asName)",(void *)StopPhoneRinging);
-    AddFunc("void HangUpPhone(string &in asName)",(void *)HangUpPhone);
+    AddFunc("void StartPhoneRinging(string &in asName)",StartPhoneRinging);
+    AddFunc("void StopPhoneRinging(string &in asName)",StopPhoneRinging);
+    AddFunc("void HangUpPhone(string &in asName)",HangUpPhone);
 
-    AddFunc("void SetPlayerUsesDragFootsteps(bool abX)",(void *)SetPlayerUsesDragFootsteps);
+    AddFunc("void SetPlayerUsesDragFootsteps(bool abX)",SetPlayerUsesDragFootsteps);
 
-	AddFunc("void AddQuest(string &in asName, string &in asNameAndTextEntry)",(void *)AddQuest);
-	AddFunc("void CompleteQuest(string &in asName, string &in asNameAndTextEntry)",(void *)CompleteQuest);
-	AddFunc("bool QuestIsCompleted(string &in asName)",(void *)QuestIsCompleted);
-	AddFunc("bool QuestIsAdded(string &in asName)",(void *)QuestIsAdded);
-	AddFunc("void SetNumberOfQuestsInMap(int alNumberOfQuests)",(void *)SetNumberOfQuestsInMap);
+	AddFunc("void AddQuest(string &in asName, string &in asNameAndTextEntry)",AddQuest);
+	AddFunc("void CompleteQuest(string &in asName, string &in asNameAndTextEntry)",CompleteQuest);
+	AddFunc("bool QuestIsCompleted(string &in asName)",QuestIsCompleted);
+	AddFunc("bool QuestIsAdded(string &in asName)",QuestIsAdded);
+	AddFunc("void SetNumberOfQuestsInMap(int alNumberOfQuests)",SetNumberOfQuestsInMap);
 
-	AddFunc("void GiveHint(string &in asName, string &in asMessageCat, string &in asMessageEntry, float afTimeShown)",(void *)GiveHint);
-	AddFunc("void BlockHint(string &in asName)", (void *)BlockHint);
-	AddFunc("void UnBlockHint(string &in asName)", (void *)UnBlockHint);
+	AddFunc("void GiveHint(string &in asName, string &in asMessageCat, string &in asMessageEntry, float afTimeShown)",GiveHint);
+	AddFunc("void BlockHint(string &in asName)", BlockHint);
+	AddFunc("void UnBlockHint(string &in asName)", UnBlockHint);
 
-	//AddFunc("void ExitInventory()",(void *)ExitInventory);
-	//AddFunc("void SetInventoryDisabled(bool abX)",(void *)SetInventoryDisabled);
-	//AddFunc("void SetInventoryMessage(string &in asTextCategory, string &in asTextEntry, float afTime)",(void *)SetInventoryMessage);
+	//AddFunc("void ExitInventory()",ExitInventory);
+	//AddFunc("void SetInventoryDisabled(bool abX)",SetInventoryDisabled);
+	//AddFunc("void SetInventoryMessage(string &in asTextCategory, string &in asTextEntry, float afTime)",SetInventoryMessage);
 	
-	AddFunc("void GiveItem(string &in asName, string &in asType, string &in asSubTypeName, string &in asImageName, float afAmount)",(void *)GiveItem);
-	AddFunc("void GiveItemFromFile(string &in asName, string &in asFileName)",(void *)GiveItemFromFile);
-	AddFunc("void RemoveItem(string &in asName)",(void *)RemoveItem);
-	AddFunc("bool HasItem(string &in asName)",(void *)HasItem);
+	AddFunc("void GiveItem(string &in asName, string &in asType, string &in asSubTypeName, string &in asImageName, float afAmount)",GiveItem);
+	AddFunc("void GiveItemFromFile(string &in asName, string &in asFileName)",GiveItemFromFile);
+	AddFunc("void RemoveItem(string &in asName)",RemoveItem);
+	AddFunc("bool HasItem(string &in asName)",HasItem);
 
-	AddFunc("void AddCombineCallback(string &in asName, string &in asItemA, string &in asItemB, string &in asFunction, bool abAutoDestroy)",(void *)AddCombineCallback);
-	AddFunc("void RemoveCombineCallback(string &in asName)",(void *)RemoveCombineCallback);
+	AddFunc("void AddCombineCallback(string &in asName, string &in asItemA, string &in asItemB, string &in asFunction, bool abAutoDestroy)",AddCombineCallback);
+	AddFunc("void RemoveCombineCallback(string &in asName)",RemoveCombineCallback);
 
-	AddFunc("void AddUseItemCallback(string &in asName, string &in asItem, string &in asEntity, string &in asFunction, bool abAutoDestroy)",(void *)AddUseItemCallback);
-	AddFunc("void RemoveUseItemCallback(string &in asName)",(void *)RemoveUseItemCallback);
+	AddFunc("void AddUseItemCallback(string &in asName, string &in asItem, string &in asEntity, string &in asFunction, bool abAutoDestroy)",AddUseItemCallback);
+	AddFunc("void RemoveUseItemCallback(string &in asName)",RemoveUseItemCallback);
 
-	AddFunc("void PreloadParticleSystem(string &in asPSFile)",(void *)PreloadParticleSystem);
-	AddFunc("void PreloadSound(string &in asSoundFile)",(void *)PreloadSound);
+	AddFunc("void PreloadParticleSystem(string &in asPSFile)",PreloadParticleSystem);
+	AddFunc("void PreloadSound(string &in asSoundFile)",PreloadSound);
 
-	AddFunc("void CreateParticleSystemAtEntity(string &in asPSName, string &in asPSFile, string &in asEntity, bool abSavePS)",(void *)CreateParticleSystemAtEntity);
-	AddFunc("void CreateParticleSystemAtEntityExt(	string &in asPSName, string &in asPSFile, string &in asEntity, bool abSavePS, float afR, float afG, float afB, float afA, bool abFadeAtDistance, float afFadeMinEnd, float afFadeMinStart, float afFadeMaxStart, float afFadeMaxEnd)", (void *)CreateParticleSystemAtEntityExt);
-	AddFunc("void DestroyParticleSystem(string &in asName)",(void *)DestroyParticleSystem); 
-	AddFunc("void DestroyParticleSystemInstantly(string &in asName)",(void *)DestroyParticleSystemInstantly); 
+	AddFunc("void CreateParticleSystemAtEntity(string &in asPSName, string &in asPSFile, string &in asEntity, bool abSavePS)",CreateParticleSystemAtEntity);
+	AddFunc("void CreateParticleSystemAtEntityExt(	string &in asPSName, string &in asPSFile, string &in asEntity, bool abSavePS, float afR, float afG, float afB, float afA, bool abFadeAtDistance, float afFadeMinEnd, float afFadeMinStart, float afFadeMaxStart, float afFadeMaxEnd)", CreateParticleSystemAtEntityExt);
+	AddFunc("void DestroyParticleSystem(string &in asName)",DestroyParticleSystem); 
+	AddFunc("void DestroyParticleSystemInstantly(string &in asName)",DestroyParticleSystemInstantly); 
 	
-	AddFunc("void PlaySoundAtEntity(string &in asSoundName, string &in asSoundFile, string &in asEntity, float afFadeSpeed, bool abSaveSound)",(void *)PlaySoundAtEntity);
-	AddFunc("void PlaySoundAtPosition(string &in asSoundName, string &in asSoundFile, float afX, float afY, float afZ, float afFadeSpeed, bool abSaveSound)",(void *)PlaySoundAtPosition);
+	AddFunc("void PlaySoundAtEntity(string &in asSoundName, string &in asSoundFile, string &in asEntity, float afFadeSpeed, bool abSaveSound)",PlaySoundAtEntity);
+	AddFunc("void PlaySoundAtPosition(string &in asSoundName, string &in asSoundFile, float afX, float afY, float afZ, float afFadeSpeed, bool abSaveSound)",PlaySoundAtPosition);
 
-	AddFunc("void FadeInSound(string &in asSoundName, float afFadeTime, bool abPlayStart)",(void *)FadeInSound);
-	AddFunc("void StopSound(string &in asSoundName, float afFadeTime)",(void *)StopSound);
-	AddFunc("void PlayMusic(string &in asMusicFile, bool abLoop, float afVolume, float afFadeTime, int alPrio, bool abResume)",(void *)PlayMusic);
-	AddFunc("void StopMusic(float afFadeTime, int alPrio)",(void *)StopMusic);
-	AddFunc("void FadeGlobalSoundVolume(float afDestVolume, float afTime)",(void *)FadeGlobalSoundVolume);
-	AddFunc("void FadeGlobalSoundSpeed(float afDestSpeed, float afTime)",(void *)FadeGlobalSoundSpeed);
+	AddFunc("void FadeInSound(string &in asSoundName, float afFadeTime, bool abPlayStart)",FadeInSound);
+	AddFunc("void StopSound(string &in asSoundName, float afFadeTime)",StopSound);
+	AddFunc("void PlayMusic(string &in asMusicFile, bool abLoop, float afVolume, float afFadeTime, int alPrio, bool abResume)",PlayMusic);
+	AddFunc("void StopMusic(float afFadeTime, int alPrio)",StopMusic);
+	AddFunc("void FadeGlobalSoundVolume(float afDestVolume, float afTime)",FadeGlobalSoundVolume);
+	AddFunc("void FadeGlobalSoundSpeed(float afDestSpeed, float afTime)",FadeGlobalSoundSpeed);
 	
-	AddFunc("void SetLightVisible(string &in asLightName, bool abVisible)",(void *)SetLightVisible);
-	AddFunc("void FadeLightTo(string &in asLightName, float afR, float afG, float afB, float afA, float afRadius, float afTime)",(void *)FadeLightTo);
-	AddFunc("void SetLightFlickerActive(string &in asLightName, bool abActive)", (void *)SetLightFlickerActive);
+	AddFunc("void SetLightVisible(string &in asLightName, bool abVisible)",SetLightVisible);
+	AddFunc("void FadeLightTo(string &in asLightName, float afR, float afG, float afB, float afA, float afRadius, float afTime)",FadeLightTo);
+	AddFunc("void SetLightFlickerActive(string &in asLightName, bool abActive)", SetLightFlickerActive);
 
-	AddFunc("void FadeLampTo(string &in asName, float afR, float afG, float afB, float afA, float afRadius, float afTime)",(void *)FadeLampTo);
-	AddFunc("void SetLampFlickerActive(string &in asName, bool abActive)", (void *)SetLampFlickerActive);
+	AddFunc("void FadeLampTo(string &in asName, float afR, float afG, float afB, float afA, float afRadius, float afTime)",FadeLampTo);
+	AddFunc("void SetLampFlickerActive(string &in asName, bool abActive)", SetLampFlickerActive);
 
-	AddFunc("void SetPhysicsAutoDisable(string &in asName, bool abAutoDisable)", (void *)SetPhysicsAutoDisable);
+	AddFunc("void SetPhysicsAutoDisable(string &in asName, bool abAutoDisable)", SetPhysicsAutoDisable);
 
-	AddFunc("void SetParticleSystemActive(string &in asName, bool abActive)", (void *)SetParticleSystemActive);
+	AddFunc("void SetParticleSystemActive(string &in asName, bool abActive)", SetParticleSystemActive);
 
-	AddFunc("void SetEntityActive(string &in asName, bool abActive)",(void *)SetEntityActive);
-	AddFunc("bool GetEntityExists(string &in asName)",(void *)GetEntityExists);
-	AddFunc("bool GetEntityActive(string &in asName)",(void *)GetEntityActive);
-	AddFunc("void SetEntityCustomFocusCrossHair(string &in asName, string &in asCrossHair)",(void *)SetEntityCustomFocusCrossHair);
-	AddFunc("void CreateEntityAtArea(string &in asEntityName, string &in asEntityFile, string &in asAreaName, bool abFullGameSave, float afPosX, float afPosY, float afPosZ, float afRotX, float afRotY, float afRotZ)",(void *)CreateEntityAtArea);
-	AddFunc("void SetEntityPlayerLookAtCallback(string &in asName, string &in asCallback, bool abRemoveWhenLookedAt)",(void *)SetEntityPlayerLookAtCallback);
-	AddFunc("void SetEntityPlayerInteractCallback(string &in asName, string &in asCallback, bool abRemoveOnInteraction)",(void *)SetEntityPlayerInteractCallback);
-	AddFunc("void SetEntityCallbackFunc(string &in asName, string &in asCallback)", (void *)SetEntityCallbackFunc);
-	AddFunc("void SetEntityConnectionStateChangeCallback(string &in asName, string &in asCallback)", (void *)SetEntityConnectionStateChangeCallback);
-	AddFunc("void SetEntityInteractionDisabled(string &in asName, bool abDisabled)", (void *)SetEntityInteractionDisabled);
-	AddFunc("bool GetEntitiesCollide(string &in asEntityA, string &in asEntityB)",(void *)GetEntitiesCollide);
+	AddFunc("void SetEntityActive(string &in asName, bool abActive)",SetEntityActive);
+	AddFunc("bool GetEntityExists(string &in asName)",GetEntityExists);
+	AddFunc("bool GetEntityActive(string &in asName)",GetEntityActive);
+	AddFunc("void SetEntityCustomFocusCrossHair(string &in asName, string &in asCrossHair)",SetEntityCustomFocusCrossHair);
+	AddFunc("void CreateEntityAtArea(string &in asEntityName, string &in asEntityFile, string &in asAreaName, bool abFullGameSave, float afPosX, float afPosY, float afPosZ, float afRotX, float afRotY, float afRotZ)",CreateEntityAtArea);
+	AddFunc("void SetEntityPlayerLookAtCallback(string &in asName, string &in asCallback, bool abRemoveWhenLookedAt)",SetEntityPlayerLookAtCallback);
+	AddFunc("void SetEntityPlayerInteractCallback(string &in asName, string &in asCallback, bool abRemoveOnInteraction)",SetEntityPlayerInteractCallback);
+	AddFunc("void SetEntityCallbackFunc(string &in asName, string &in asCallback)", SetEntityCallbackFunc);
+	AddFunc("void SetEntityConnectionStateChangeCallback(string &in asName, string &in asCallback)", SetEntityConnectionStateChangeCallback);
+	AddFunc("void SetEntityInteractionDisabled(string &in asName, bool abDisabled)", SetEntityInteractionDisabled);
+	AddFunc("bool GetEntitiesCollide(string &in asEntityA, string &in asEntityB)",GetEntitiesCollide);
 	
-	AddFunc("void SetPropEffectActive(string &in asName, bool abActive, bool abFadeAndPlaySounds)", (void *)SetPropEffectActive);
-	AddFunc("void SetPropActiveAndFade(string &in asName, bool abActive, float afFadeTime)",(void *)SetPropActiveAndFade);
-	AddFunc("void SetPropStaticPhysics(string &in asName, bool abX)", (void *)SetPropStaticPhysics);
-	AddFunc("bool GetPropIsInteractedWith(string &in asName)", (void *)GetPropIsInteractedWith);
-	AddFunc("void RotatePropToSpeed(string &in asName, float afAcc, float afGoalSpeed, float afAxisX, float afAxisY, float afAxisZ, bool abResetSpeed, string &in asOffsetArea)", (void *)RotatePropToSpeed);	
-	AddFunc("void StopPropMovement(string &in asName)", (void *)StopPropMovement);	
+	AddFunc("void SetPropEffectActive(string &in asName, bool abActive, bool abFadeAndPlaySounds)", SetPropEffectActive);
+	AddFunc("void SetPropActiveAndFade(string &in asName, bool abActive, float afFadeTime)",SetPropActiveAndFade);
+	AddFunc("void SetPropStaticPhysics(string &in asName, bool abX)", SetPropStaticPhysics);
+	AddFunc("bool GetPropIsInteractedWith(string &in asName)", GetPropIsInteractedWith);
+	AddFunc("void RotatePropToSpeed(string &in asName, float afAcc, float afGoalSpeed, float afAxisX, float afAxisY, float afAxisZ, bool abResetSpeed, string &in asOffsetArea)", RotatePropToSpeed);	
+	AddFunc("void StopPropMovement(string &in asName)", StopPropMovement);	
 
-	AddFunc("void AttachPropToBone(string &in asChildEntityName, string &in asParentEntityName, string &in asParentBoneName, float fPosX, float fPosY, float fPosZ, float fRotX, float fRotY, float fRotZ)",(void *)AttachPropToBone);
-	AddFunc("void DetachPropFromBone(string &in asChildEntityName)",(void *)DetachPropFromBone);
+	AddFunc("void AttachPropToBone(string &in asChildEntityName, string &in asParentEntityName, string &in asParentBoneName, float fPosX, float fPosY, float fPosZ, float fRotX, float fRotY, float fRotZ)",AttachPropToBone);
+	AddFunc("void DetachPropFromBone(string &in asChildEntityName)",DetachPropFromBone);
 
-	AddFunc("void AddAttachedPropToProp(string &in asPropName, string &in asAttachName, string &in asAttachFile, float fPosX, float fPosY, float fPosZ, float fRotX, float fRotY, float fRotZ)",(void *)AddAttachedPropToProp);
-	AddFunc("void RemoveAttachedPropFromProp(string &in asPropName, string &in asAttachName)",(void *)RemoveAttachedPropFromProp);
+	AddFunc("void AddAttachedPropToProp(string &in asPropName, string &in asAttachName, string &in asAttachFile, float fPosX, float fPosY, float fPosZ, float fRotX, float fRotY, float fRotZ)",AddAttachedPropToProp);
+	AddFunc("void RemoveAttachedPropFromProp(string &in asPropName, string &in asAttachName)",RemoveAttachedPropFromProp);
 
-	AddFunc("void SetLampCanBeLitByPlayer(string &in asName, bool abLit)",(void *)SetLampCanBeLitByPlayer); 
+	AddFunc("void SetLampCanBeLitByPlayer(string &in asName, bool abLit)",SetLampCanBeLitByPlayer); 
 
-	AddFunc("void SetLampLit(string &in asName, bool abLit, bool abEffects)",(void *)SetLampLit); 
-	AddFunc("void SetSwingDoorLocked(string &in asName, bool abLocked, bool abEffects)",(void *)SetSwingDoorLocked);
-	AddFunc("void SetSwingDoorClosed(string &in asName, bool abClosed, bool abEffects)",(void *)SetSwingDoorClosed);
-	AddFunc("void SetSwingDoorDisableAutoClose(string &in asName, bool abDisableAutoClose)",(void *)SetSwingDoorDisableAutoClose);
-	AddFunc("void SetSwingDoorOpenAmount(string &in asName, float afOpenAmount, float afDuration, bool abOpenTowardsMaxAngle)",(void *)SetSwingDoorOpenAmount);
-	AddFunc("void SetLevelDoorLocked(string &in asName, bool abLocked)", (void *)SetLevelDoorLocked);
-	AddFunc("void SetLevelDoorLockedSound(string &in asName, string &in asSound)", (void *)SetLevelDoorLockedSound);
-	AddFunc("void SetLevelDoorLockedText(string &in asName, string &in asTextCat, string &in asTextEntry)", (void *)SetLevelDoorLockedText);
-	AddFunc("bool GetSwingDoorLocked(string &in asName)",(void *)GetSwingDoorLocked);
-	AddFunc("bool GetSwingDoorClosed(string &in asName)",(void *)GetSwingDoorClosed);
-	AddFunc("int GetSwingDoorState(string &in asName)",(void *)GetSwingDoorState);
-	AddFunc("void SetPropObjectStuckState(string &in asName, int alState)",(void *)SetPropObjectStuckState);
-	AddFunc("void SetWheelAngle(string &in asName, float afAngle, bool abAutoMove)",(void *)SetWheelAngle);
-	AddFunc("void SetWheelStuckState(string &in asName, int alState, bool abEffects)",(void *)SetWheelStuckState);
-	AddFunc("void SetLeverStuckState(string &in asName, int alState, bool abEffects)",(void *)SetLeverStuckState);
-	AddFunc("void SetWheelInteractionDisablesStuck(string &in asName, bool abX)",(void *)SetWheelInteractionDisablesStuck);
-	AddFunc("void SetLeverInteractionDisablesStuck(string &in asName, bool abX)",(void *)SetLeverInteractionDisablesStuck);
-	AddFunc("int GetLeverState(string &in asName)",(void *)GetLeverState);
+	AddFunc("void SetLampLit(string &in asName, bool abLit, bool abEffects)",SetLampLit); 
+	AddFunc("void SetSwingDoorLocked(string &in asName, bool abLocked, bool abEffects)",SetSwingDoorLocked);
+	AddFunc("void SetSwingDoorClosed(string &in asName, bool abClosed, bool abEffects)",SetSwingDoorClosed);
+	AddFunc("void SetSwingDoorDisableAutoClose(string &in asName, bool abDisableAutoClose)",SetSwingDoorDisableAutoClose);
+	AddFunc("void SetSwingDoorOpenAmount(string &in asName, float afOpenAmount, float afDuration, bool abOpenTowardsMaxAngle)",SetSwingDoorOpenAmount);
+	AddFunc("void SetLevelDoorLocked(string &in asName, bool abLocked)", SetLevelDoorLocked);
+	AddFunc("void SetLevelDoorLockedSound(string &in asName, string &in asSound)", SetLevelDoorLockedSound);
+	AddFunc("void SetLevelDoorLockedText(string &in asName, string &in asTextCat, string &in asTextEntry)", SetLevelDoorLockedText);
+	AddFunc("bool GetSwingDoorLocked(string &in asName)",GetSwingDoorLocked);
+	AddFunc("bool GetSwingDoorClosed(string &in asName)",GetSwingDoorClosed);
+	AddFunc("int GetSwingDoorState(string &in asName)",GetSwingDoorState);
+	AddFunc("void SetPropObjectStuckState(string &in asName, int alState)",SetPropObjectStuckState);
+	AddFunc("void SetWheelAngle(string &in asName, float afAngle, bool abAutoMove)",SetWheelAngle);
+	AddFunc("void SetWheelStuckState(string &in asName, int alState, bool abEffects)",SetWheelStuckState);
+	AddFunc("void SetLeverStuckState(string &in asName, int alState, bool abEffects)",SetLeverStuckState);
+	AddFunc("void SetWheelInteractionDisablesStuck(string &in asName, bool abX)",SetWheelInteractionDisablesStuck);
+	AddFunc("void SetLeverInteractionDisablesStuck(string &in asName, bool abX)",SetLeverInteractionDisablesStuck);
+	AddFunc("int GetLeverState(string &in asName)",GetLeverState);
 	
-	AddFunc("void SetMultiSliderStuckState(string &in asName, int alStuckState, bool abEffects)",(void *)SetMultiSliderStuckState);
-	AddFunc("void SetMultiSliderCallback(string &in asName, string &in asCallback)",(void *)SetMultiSliderCallback);
+	AddFunc("void SetMultiSliderStuckState(string &in asName, int alStuckState, bool abEffects)",SetMultiSliderStuckState);
+	AddFunc("void SetMultiSliderCallback(string &in asName, string &in asCallback)",SetMultiSliderCallback);
 	
-	AddFunc("void SetButtonSwitchedOn(string &in asName, bool abSwitchedOn, bool abEffects)",(void *)SetButtonSwitchedOn);
-	AddFunc("void SetButtonCanBeSwitchedOn(string &in asName, bool abCanBeSwitchedOn)",(void *)SetButtonCanBeSwitchedOn);
-	AddFunc("void SetButtonCanBeSwitchedOff(string &in asName, bool abCanBeSwitchedOff)",(void *)SetButtonCanBeSwitchedOff);
+	AddFunc("void SetButtonSwitchedOn(string &in asName, bool abSwitchedOn, bool abEffects)",SetButtonSwitchedOn);
+	AddFunc("void SetButtonCanBeSwitchedOn(string &in asName, bool abCanBeSwitchedOn)",SetButtonCanBeSwitchedOn);
+	AddFunc("void SetButtonCanBeSwitchedOff(string &in asName, bool abCanBeSwitchedOff)",SetButtonCanBeSwitchedOff);
 
-    AddFunc("void SetAllowStickyAreaAttachment(bool abX)", (void *)SetAllowStickyAreaAttachment);
-	AddFunc("void AttachPropToStickyArea(string &in asAreaName, string &in asProp)", (void *)AttachPropToStickyArea);
-	AddFunc("void AttachBodyToStickyArea(string &in asAreaName, string &in asBody)", (void *)AttachBodyToStickyArea);
-	AddFunc("void DetachFromStickyArea(string &in asAreaName)", (void *)DetachFromStickyArea);
-	AddFunc("void SetNPCAwake(string &in asName, bool abAwake, bool abEffects)",(void *)SetNPCAwake);
-	AddFunc("void SetNPCFollowPlayer(string &in asName, bool abX)",(void *)SetNPCFollowPlayer);
+    AddFunc("void SetAllowStickyAreaAttachment(bool abX)", SetAllowStickyAreaAttachment);
+	AddFunc("void AttachPropToStickyArea(string &in asAreaName, string &in asProp)", AttachPropToStickyArea);
+	AddFunc("void AttachBodyToStickyArea(string &in asAreaName, string &in asBody)", AttachBodyToStickyArea);
+	AddFunc("void DetachFromStickyArea(string &in asAreaName)", DetachFromStickyArea);
+	AddFunc("void SetNPCAwake(string &in asName, bool abAwake, bool abEffects)",SetNPCAwake);
+	AddFunc("void SetNPCFollowPlayer(string &in asName, bool abX)",SetNPCFollowPlayer);
 
-	AddFunc("void AttachAreaToProp(string &in asAreaName, string &in asProp, int alBody)", (void*)AttachAreaToProp);
+	AddFunc("void AttachAreaToProp(string &in asAreaName, string &in asProp, int alBody)", AttachAreaToProp);
 
-	AddFunc("void SetEnemyDisabled(string &in asName, bool abDisabled)",(void *)SetEnemyDisabled);
-	AddFunc("void SetEnemyActivationDistance(string &in asName, float afX)",(void *)SetEnemyActivationDistance);
-	AddFunc("void SetEnemyIsHallucination(string &in asName, bool abX)",(void *)SetEnemyIsHallucination);
-	AddFunc("void FadeEnemyToSmoke(string &in asName, bool abPlaySound)",(void *)FadeEnemyToSmoke);
-	AddFunc("void SetEnemyDisableTriggers(string &in asName, bool abX)",(void *)SetEnemyDisableTriggers);
-	AddFunc("void ShowEnemyPlayerPosition(string &in asName)",(void *)ShowEnemyPlayerPosition);
-	AddFunc("void ForceEnemyWaitState(string &in asName)",(void *)ForceEnemyWaitState);
-	AddFunc("void AddEnemyPatrolNode(string &in asEnemyName, string &in asNodeName, float afWaitTime, string &in asAnimation, bool abLoopAnimation)",(void *)AddEnemyPatrolNode);
-	AddFunc("void ClearEnemyPatrolNodes(string &in asEnemyName)",(void *)ClearEnemyPatrolNodes);
-	AddFunc("void PlayEnemyAnimation(string &in asEnemyName, string &in asAnimName, bool abLoop, float afFadeTime)",(void *)PlayEnemyAnimation);
-	AddFunc("void TeleportEnemyToNode(string &in asEnemyName, string &in asNodeName, bool abChangeY)",(void *)TeleportEnemyToNode);
-	AddFunc("float GetEnemyPlayerDistance(string &in asEnemyName)",(void *)GetEnemyPlayerDistance);
-	AddFunc("bool GetPlayerCanSeeEnemy(string &in asEnemyName)",(void *)GetPlayerCanSeeEnemy);
+	AddFunc("void SetEnemyDisabled(string &in asName, bool abDisabled)",SetEnemyDisabled);
+	AddFunc("void SetEnemyActivationDistance(string &in asName, float afX)",SetEnemyActivationDistance);
+	AddFunc("void SetEnemyIsHallucination(string &in asName, bool abX)",SetEnemyIsHallucination);
+	AddFunc("void FadeEnemyToSmoke(string &in asName, bool abPlaySound)",FadeEnemyToSmoke);
+	AddFunc("void SetEnemyDisableTriggers(string &in asName, bool abX)",SetEnemyDisableTriggers);
+	AddFunc("void ShowEnemyPlayerPosition(string &in asName)",ShowEnemyPlayerPosition);
+	AddFunc("void ForceEnemyWaitState(string &in asName)",ForceEnemyWaitState);
+	AddFunc("void AddEnemyPatrolNode(string &in asEnemyName, string &in asNodeName, float afWaitTime, string &in asAnimation, bool abLoopAnimation)",AddEnemyPatrolNode);
+	AddFunc("void ClearEnemyPatrolNodes(string &in asEnemyName)",ClearEnemyPatrolNodes);
+	AddFunc("void PlayEnemyAnimation(string &in asEnemyName, string &in asAnimName, bool abLoop, float afFadeTime)",PlayEnemyAnimation);
+	AddFunc("void TeleportEnemyToNode(string &in asEnemyName, string &in asNodeName, bool abChangeY)",TeleportEnemyToNode);
+	AddFunc("float GetEnemyPlayerDistance(string &in asEnemyName)",GetEnemyPlayerDistance);
+	AddFunc("bool GetPlayerCanSeeEnemy(string &in asEnemyName)",GetPlayerCanSeeEnemy);
 
-	AddFunc("void ChangeEnemyPose(string&in asName, string&in asPoseType)",(void *)ChangeEnemyPose);
-	AddFunc("void SetEnemyMoveType(string &in asEnemyName, string &in asMoveType)",(void *)SetEnemyMoveType);
-	AddFunc("void SetManPigType(string &in asManPigName, string &in asManPigType)",(void *)SetManPigType);
-	AddFunc("void SendEnemyTimeOut(string &in asEnemyName, float afTimeOut)",(void *)SendEnemyTimeOut);
-	AddFunc("void StopAnimationAndContinue(string &in asEnemyName, float afTimeOut)",(void *)StopAnimationAndContinue);
-	AddFunc("void PlayScriptedAnimation(string &in asEnemyName, string &in asAnimationName, bool abLoopAnimation)",(void *)PlayScriptedAnimation);
-	AddFunc("void SetEnemyBlind(string&in asName, bool abX)",(void *)SetEnemyBlind);
-	AddFunc("void SetEnemyDeaf(string&in asName, bool abX)",(void *)SetEnemyDeaf);
-	AddFunc("void SetTeslaPigFadeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigFadeDisabled);
-	AddFunc("void SetTeslaPigSoundDisabled(string&in asName, bool abX)",(void *)SetTeslaPigSoundDisabled);
-	AddFunc("void SetTeslaPigEasyEscapeDisabled(string&in asName, bool abX)",(void *)SetTeslaPigEasyEscapeDisabled);
-	AddFunc("void ForceTeslaPigSighting(string&in asName)",(void *)ForceTeslaPigSighting);
-	AddFunc("int GetEnemyState(string &in asName)",(void *)GetEnemyState);
-	AddFunc("string& GetEnemyStateName(string &in asName)",(void *)GetEnemyStateName);
-	AddFunc("int StringToInt(string &in asString)",(void *)StringToInt);
+	AddFunc("void ChangeEnemyPose(string&in asName, string&in asPoseType)",ChangeEnemyPose);
+	AddFunc("void SetEnemyMoveType(string &in asEnemyName, string &in asMoveType)",SetEnemyMoveType);
+	AddFunc("void SetManPigType(string &in asManPigName, string &in asManPigType)",SetManPigType);
+	AddFunc("void SendEnemyTimeOut(string &in asEnemyName, float afTimeOut)",SendEnemyTimeOut);
+	AddFunc("void StopAnimationAndContinue(string &in asEnemyName, float afTimeOut)",StopAnimationAndContinue);
+	AddFunc("void PlayScriptedAnimation(string &in asEnemyName, string &in asAnimationName, bool abLoopAnimation)",PlayScriptedAnimation);
+	AddFunc("void SetEnemyBlind(string&in asName, bool abX)",SetEnemyBlind);
+	AddFunc("void SetEnemyDeaf(string&in asName, bool abX)",SetEnemyDeaf);
+	AddFunc("void SetTeslaPigFadeDisabled(string&in asName, bool abX)",SetTeslaPigFadeDisabled);
+	AddFunc("void SetTeslaPigSoundDisabled(string&in asName, bool abX)",SetTeslaPigSoundDisabled);
+	AddFunc("void SetTeslaPigEasyEscapeDisabled(string&in asName, bool abX)",SetTeslaPigEasyEscapeDisabled);
+	AddFunc("void ForceTeslaPigSighting(string&in asName)",ForceTeslaPigSighting);
+	AddFunc("int GetEnemyState(string &in asName)",GetEnemyState);
+	AddFunc("string& GetEnemyStateName(string &in asName)",GetEnemyStateName);
+	AddFunc("int StringToInt(string &in asString)",StringToInt);
 
-	AddFunc("void SetPropHealth(string &in asName, float afHealth)",(void *)SetPropHealth);
-	AddFunc("void AddPropHealth(string &in asName, float afHealth)",(void *)AddPropHealth);
-	AddFunc("float GetPropHealth(string &in asName)",(void *)GetPropHealth);
-	AddFunc("void ResetProp(string &in asName)",(void *)ResetProp);
-	AddFunc("void PlayPropAnimation(string &in asProp, string &in asAnimation, float afFadeTime, bool abLoop, string &in asCallback)",(void *)PlayPropAnimation);
-	AddFunc("void StopPropAnimation(string &in asProp)",(void *)StopPropAnimation);
-	AddFunc("void PlayCurrentPropAnimation(string &in asProp, float afFadeTime, bool abLoop)",(void *)PlayCurrentAnimation);
-	AddFunc("void PauseCurrentPropAnimation(string &in asProp, float afFadeTime)",(void *)PauseCurrentAnimation);
-	AddFunc("void SetPropAnimationSpeed(string &in asProp, float afSpeed)",(void *)SetPropAnimationSpeed);
-	AddFunc("void SetPropAnimationPosition(string &in asProp, float afPos)",(void *)SetPropAnimationPosition);
+	AddFunc("void SetPropHealth(string &in asName, float afHealth)",SetPropHealth);
+	AddFunc("void AddPropHealth(string &in asName, float afHealth)",AddPropHealth);
+	AddFunc("float GetPropHealth(string &in asName)",GetPropHealth);
+	AddFunc("void ResetProp(string &in asName)",ResetProp);
+	AddFunc("void PlayPropAnimation(string &in asProp, string &in asAnimation, float afFadeTime, bool abLoop, string &in asCallback)",PlayPropAnimation);
+	AddFunc("void StopPropAnimation(string &in asProp)",StopPropAnimation);
+	AddFunc("void PlayCurrentPropAnimation(string &in asProp, float afFadeTime, bool abLoop)",PlayCurrentAnimation);
+	AddFunc("void PauseCurrentPropAnimation(string &in asProp, float afFadeTime)",PauseCurrentAnimation);
+	AddFunc("void SetPropAnimationSpeed(string &in asProp, float afSpeed)",SetPropAnimationSpeed);
+	AddFunc("void SetPropAnimationPosition(string &in asProp, float afPos)",SetPropAnimationPosition);
 
-	AddFunc("void SetMoveObjectState(string &in asName, float afState)",(void *)SetMoveObjectState);
-	AddFunc("void SetMoveObjectStateExt(string &in asName, float afState, float afAcc, float afMaxSpeed, float afSlowdownDist, bool abResetSpeed)",(void *)SetMoveObjectStateExt);
+	AddFunc("void SetMoveObjectState(string &in asName, float afState)",SetMoveObjectState);
+	AddFunc("void SetMoveObjectStateExt(string &in asName, float afState, float afAcc, float afMaxSpeed, float afSlowdownDist, bool abResetSpeed)",SetMoveObjectStateExt);
 
-	AddFunc("void AddPropForce(string &in asName, float afX, float afY, float afZ, string &in asCoordSystem)",(void *)AddPropForce);
-	AddFunc("void AddPropImpulse(string &in asName, float afX, float afY, float afZ, string &in asCoordSystem)",(void *)AddPropImpulse);
-	AddFunc("void AddBodyForce(string &in asName, float afX, float afY, float afZ, string &in asCoordSystem)",(void *)AddBodyForce);
-	AddFunc("void AddBodyImpulse(string &in asName, float afX, float afY, float afZ, string &in asCoordSystem)",(void *)AddBodyImpulse);
-	AddFunc("void BreakJoint(string &in asName)", (void *)BreakJoint);
+	AddFunc("void AddPropForce(string &in asName, float afX, float afY, float afZ, string &in asCoordSystem)",AddPropForce);
+	AddFunc("void AddPropImpulse(string &in asName, float afX, float afY, float afZ, string &in asCoordSystem)",AddPropImpulse);
+	AddFunc("void AddBodyForce(string &in asName, float afX, float afY, float afZ, string &in asCoordSystem)",AddBodyForce);
+	AddFunc("void AddBodyImpulse(string &in asName, float afX, float afY, float afZ, string &in asCoordSystem)",AddBodyImpulse);
+	AddFunc("void BreakJoint(string &in asName)", BreakJoint);
 
 
-	AddFunc("void AddEntityCollideCallback(string &in asParentName, string &in asChildName, string &in asFunction, bool abDeleteOnCollide, int alStates)",(void *)AddEntityCollideCallback);
-	AddFunc("void RemoveEntityCollideCallback(string &in asParentName, string &in asChildName)", (void *)RemoveEntityCollideCallback);
+	AddFunc("void AddEntityCollideCallback(string &in asParentName, string &in asChildName, string &in asFunction, bool abDeleteOnCollide, int alStates)",AddEntityCollideCallback);
+	AddFunc("void RemoveEntityCollideCallback(string &in asParentName, string &in asChildName)", RemoveEntityCollideCallback);
 
-	//AddFunc("void CreateRope(string &in asName,string &in asStartArea, string &in asEndArea, string &in asStartBody, string &in asEndBody,float afMinTotalLength, float afMaxTotalLength,float afSegmentLength, float afDamping,float afStrength, float afStiffness, string &in asMaterial, float afRadius, float afLengthTileAmount, float afLengthTileSize, string &in asSound,float afSoundStartSpeed, float afSoundStopSpeed,bool abAutoMove, float afAutoMoveAcc, float afAutoMoveMaxSpeed)",(void *)CreateRope);
+	//AddFunc("void CreateRope(string &in asName,string &in asStartArea, string &in asEndArea, string &in asStartBody, string &in asEndBody,float afMinTotalLength, float afMaxTotalLength,float afSegmentLength, float afDamping,float afStrength, float afStiffness, string &in asMaterial, float afRadius, float afLengthTileAmount, float afLengthTileSize, string &in asSound,float afSoundStartSpeed, float afSoundStopSpeed,bool abAutoMove, float afAutoMoveAcc, float afAutoMoveMaxSpeed)",CreateRope);
 
-	AddFunc("void InteractConnectPropWithRope(string &in asName, string &in asLeverName, string &in asPropName, bool abInteractOnly, float afSpeedMul,float afMinSpeed, float afMaxSpeed, bool abInvert, int alStatesUsed)",(void *)InteractConnectPropWithRope);
-	AddFunc("void InteractConnectPropWithMoveObject(string &in asName, string &in asPropName, string &in asMoveObjectName, bool abInteractOnly,bool abInvert, int alStatesUsed)",(void *)InteractConnectPropWithMoveObject);
-	AddFunc("void ConnectEntities(string &in asName, string &in asMainEntity, string &in asConnectEntity, bool abInvertStateSent, int alStatesUsed, string &in asCallbackFunc)",(void *)ConnectEntities); 
+	AddFunc("void InteractConnectPropWithRope(string &in asName, string &in asLeverName, string &in asPropName, bool abInteractOnly, float afSpeedMul,float afMinSpeed, float afMaxSpeed, bool abInvert, int alStatesUsed)",InteractConnectPropWithRope);
+	AddFunc("void InteractConnectPropWithMoveObject(string &in asName, string &in asPropName, string &in asMoveObjectName, bool abInteractOnly,bool abInvert, int alStatesUsed)",InteractConnectPropWithMoveObject);
+	AddFunc("void ConnectEntities(string &in asName, string &in asMainEntity, string &in asConnectEntity, bool abInvertStateSent, int alStatesUsed, string &in asCallbackFunc)",ConnectEntities); 
 
 }
 //-----------------------------------------------------------------------

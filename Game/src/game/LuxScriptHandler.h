@@ -23,6 +23,7 @@
 //----------------------------------------------
 
 #include "LuxBase.h"
+#include "impl/LowLevelSystemSDL.h"
 
 //----------------------------------------------
 
@@ -51,7 +52,15 @@ private:
 
 	// Helpers
 	void InitScriptFunctions();
-	void AddFunc(const tString& asFunc, void *apFuncPtr);
+	
+	void AddFuncInternal(const tString& asFunc, const asSFuncPtr& apFunc)
+	{
+		auto sdlSystem = dynamic_cast<cLowLevelSystemSDL*>(mpLowLevelSystem);
+		if(sdlSystem)
+			sdlSystem->AddScriptFunc(asFunc, apFunc);
+		else
+			FatalError("Unknown LowLewelSystem");
+	}
 
 	static bool GetEntities(const tString& asName,tLuxEntityList &alstEntities, eLuxEntityType aType, int alSubType);
 	static iLuxEntity* GetEntity(const tString& asName, eLuxEntityType aType, int alSubType);
