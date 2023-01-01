@@ -34,7 +34,7 @@ class iLuxItemType
 {
 public:	
 	iLuxItemType(const tString& asName, eLuxItemType aType);
-	~iLuxItemType();
+	virtual ~iLuxItemType();
 
 	const tString& GetName(){ return msName; }
 	eLuxItemType GetType(){ return mType;}

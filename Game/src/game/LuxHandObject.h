@@ -53,7 +53,7 @@ class iLuxHandObject
 friend class cLuxHandObjectLoader;
 public:	
 	iLuxHandObject(const tString& asName, cLuxPlayerHands *apHands);
-	~iLuxHandObject();
+	virtual ~iLuxHandObject();
 
 	////////////////////////
 	//General
