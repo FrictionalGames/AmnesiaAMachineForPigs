@@ -32,7 +32,7 @@ class iLuxEffect
 {
 public:
 	iLuxEffect() : mbActive(false) {}
-	~iLuxEffect(){}
+	virtual ~iLuxEffect(){}
 
 	virtual void Update(float afTimeStep)=0;
 	virtual void OnDraw(float afFrameTime)=0;
@@ -493,7 +493,7 @@ class cLuxEffectHandler : public iLuxUpdateable
 {
 public:	
 	cLuxEffectHandler();
-	~cLuxEffectHandler();
+	virtual ~cLuxEffectHandler();
 
 	///////////////////////////
 	// General

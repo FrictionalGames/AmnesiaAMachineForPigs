@@ -10,10 +10,8 @@ link_directories(
     ${DEP_LIB_DIR}
 )
 
-add_definitions(-DUSE_SDL2)
-
 add_executable(Launcher launcher.cpp Main.cpp QualityChooser.cpp LauncherHelper.cpp)
-target_link_libraries(Launcher HPL2 fltk_images fltk Xext X11 Xft fontconfig jpeg)
+target_link_libraries(Launcher HPL2 fltk_images Xinerama Xfixes Xcursor Xrender fltk Xext X11 Xft fontconfig jpeg)
 
 install(TARGETS Launcher
     RUNTIME DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/../../redist"

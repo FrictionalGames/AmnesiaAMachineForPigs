@@ -121,9 +121,9 @@ public:
 	cVector2f GetSmoothMousePos(const cVector2f& avRelPosMouse);
 	cVector2f GetSluggishMousePos(const cVector2f& avRelPosMouse);
 	
-#ifdef USE_GAMEPAD
 	bool IsGamepadPresent();
 
+#ifdef USE_GAMEPAD
 	void AppDeviceWasPlugged();
 	void AppDeviceWasRemoved();
 #endif

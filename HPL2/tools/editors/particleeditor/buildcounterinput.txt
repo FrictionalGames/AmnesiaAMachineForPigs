@@ -1,3 +1,0 @@
-AppName ParticleEditor
-OutHeaderPath .
-OutSourcePath .

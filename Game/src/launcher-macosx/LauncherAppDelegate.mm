@@ -258,13 +258,8 @@ bool InitPaths(const hpl::tWString &asConfigfile) {
 	//Set the name of the folder (in Lux) that all save stuff will be put.
 	gsMainSaveFolder = pInitCfg->GetStringW("Directories","MainSaveFolder",_W(""));
 	
-	
 	//Get the config file paths
-#if USE_SDL2
 	gsDefaultMainConfigPath = pInitCfg->GetStringW("ConfigFiles", "DefaultMainSettingsSDL2",_W(""));
-#else
-	gsDefaultMainConfigPath = pInitCfg->GetStringW("ConfigFiles", "DefaultMainSettings",_W(""));
-#endif
 	
 	// Get presets paths
 	gsDefaultMainConfigPathLow = pInitCfg->GetStringW("ConfigFiles", "DefaultMainSettingsLow",_W(""));

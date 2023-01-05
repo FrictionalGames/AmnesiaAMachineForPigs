@@ -482,11 +482,7 @@ bool cLuxPlayerState_InteractGrab::OnAddPitch(float afAmount)
 		{
 			/////////////
 			// Check which one of them was used for the input this frame
-#if USE_SDL2
 			if(cMath::Abs(gpBase->mpInputHandler->GetGamepad()->GetAxisValue(eGamepadAxis_RightY)) > 0.0f)
-#else
-			if(cMath::Abs(gpBase->mpInputHandler->GetGamepad()->GetAxisValue(eGamepadAxis_3)) > 0.0f)
-#endif
 			{
 				//Gamepad was used
 				if(gpBase->mpInputHandler->GetInvertGamepadLook()) afAmount = -afAmount;

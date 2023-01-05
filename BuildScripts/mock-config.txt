@@ -7,5 +7,4 @@ else
 fi
 parent=../
 cmake_path=../
-cmake_options="-DUSE_SDL2=ON"
 dst_root=AmnesiaPig
