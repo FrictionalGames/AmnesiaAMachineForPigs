@@ -59,6 +59,8 @@ iEditorWindow::iEditorWindow(iEditorBase* apEditor, const tString& asName)
 
 iEditorWindow::~iEditorWindow()
 {
+	if (mpBGFrame)
+        	mpSet->DestroyWidget(mpBGFrame, true);
 	STLDeleteAll(mlstInputs);
 }
 
