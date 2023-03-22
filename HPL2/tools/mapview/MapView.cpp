@@ -652,6 +652,8 @@ public:
 		gpSimpleCamera->GetViewport()->AddRendererCallback(&renderCallback);
 		
 		gpSimpleCamera->SetMouseMode(true);
+		gpEngine->GetInput()->GetLowLevel()->LockInput(false);
+		gpEngine->GetInput()->GetLowLevel()->RelativeMouse(false);
 
 		//pSettings->mbLog = true;
 
