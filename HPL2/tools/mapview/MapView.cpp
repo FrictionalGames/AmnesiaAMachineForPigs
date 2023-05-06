@@ -2034,7 +2034,7 @@ int hplMain(const tString &asCommandline)
 	vars.mGraphics.mbFullscreen = gpConfig->GetBool("Screen","FullScreen", false);
 	gpEngine = CreateHPLEngine(eHplAPI_OpenGL, eHplSetup_All, &vars);
 	gpEngine->SetLimitFPS(false);
-	gpEngine->GetGraphics()->GetLowLevel()->SetVsyncActive(false);
+	gpEngine->GetGraphics()->GetLowLevel()->SetVsyncActive(false, false);
 	gpEngine->SetWaitIfAppOutOfFocus(true);
 
 	gsNodeCont_Name = gpConfig->GetString("NodeCont","Name", "MapViewTest");
