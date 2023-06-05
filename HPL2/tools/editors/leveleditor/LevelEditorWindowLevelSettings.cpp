@@ -73,6 +73,7 @@ void cLevelEditorWindowLevelSettings::OnInitLayout()
 	mpWindow->SetText(_W("Level Settings"));
 
 	cWidgetTabFrame* pTabFrame = mpSet->CreateWidgetTabFrame(cVector3f(10,35,0.1f), mvSize-cVector2f(20,40), _W(""), mpWindow);
+	AddWidget(pTabFrame);
 	
 	////////////////////////////////////////////////////////
 	// SkyBox parameters tab
@@ -123,7 +124,7 @@ void cLevelEditorWindowLevelSettings::OnInitLayout()
 	vPos.x += mpInpGlobalMaxDecalTris->GetSize().x + 15;
 	mpBResetDecals = mpSet->CreateWidgetButton(vPos, cVector2f(100,20), _W("Reset created decals"), pTab);
 	mpBResetDecals->AddCallback(eGuiMessage_ButtonPressed, this, kGuiCallback(ResetDecals));
-
+	AddWidget(mpBResetDecals);
 }
 
 //---------------------------------------------------------------------------------
