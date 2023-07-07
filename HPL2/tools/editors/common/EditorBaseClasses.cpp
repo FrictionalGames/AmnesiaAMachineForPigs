@@ -830,7 +830,7 @@ cEngine* iEditorBase::Init(cEngine* apEngine, bool abDestroyEngineOnExit)
 
 		mpEngine = CreateHPLEngine(eHplAPI_OpenGL, eHplSetup_All, &vars);
 		mpEngine->GetInput()->GetLowLevel()->LockInput(false);
-		gpEngine->GetInput()->GetLowLevel()->RelativeMouse(false);
+		mpEngine->GetInput()->GetLowLevel()->RelativeMouse(false);
 
 		mpEngine->GetResources()->GetMaterialManager()->SetTextureSizeDownScaleLevel(cString::ToInt(GetSetting("TexQuality").c_str(), 0));
 

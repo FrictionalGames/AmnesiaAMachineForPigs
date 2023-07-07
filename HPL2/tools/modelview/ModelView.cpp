@@ -573,6 +573,7 @@ public:
 	void SetupView()
 	{
 		gpEngine->GetInput()->GetLowLevel()->LockInput(false);
+		gpEngine->GetInput()->GetLowLevel()->RelativeMouse(false);
 
 		cRenderSettings *pSettings = gpSimpleCamera->GetViewport()->GetRenderSettings();
 		gpSimpleCamera->GetViewport()->AddRendererCallback(&renderCallback);
@@ -979,7 +980,7 @@ public:
 		else
 			SetPhysicsActive(gbPhysicsActive);
 
-		cPlatform::SetWindowCaption("ModelView - "+cString::GetFileName(asFileName));
+		mpLowLevelGraphics->SetWindowCaption("ModelView - "+cString::GetFileName(asFileName));
 
 		Log("--------- MODEL INFO ------------------\n");
 
@@ -2396,7 +2397,7 @@ int hplMain(const tString &asCommandline)
 	//vars.mGraphics.mvWindowPosition = cVector2l(0,0);
 	gpEngine = CreateHPLEngine(eHplAPI_OpenGL, eHplSetup_All, &vars);
 	gpEngine->SetLimitFPS(false);
-	gpEngine->GetGraphics()->GetLowLevel()->SetVsyncActive(false);
+	gpEngine->GetGraphics()->GetLowLevel()->SetVsyncActive(false, false);
 	gpEngine->SetWaitIfAppOutOfFocus(true);
 	
 
