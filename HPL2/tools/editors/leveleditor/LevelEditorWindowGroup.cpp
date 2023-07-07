@@ -243,6 +243,7 @@ void cLevelEditorWindowGroup::OnInitLayout()
 	mpCheckBoxGroupVisibility = mpSet->CreateWidgetCheckBox(cVector3f(10,450,0.1f), 0, _W("Visible"),mpWindow);
 	mpCheckBoxGroupVisibility->SetDefaultFontSize(vTextSize);
 	mpCheckBoxGroupVisibility->AddCallback(eGuiMessage_CheckChange, this, kGuiCallback(VisibilityCheckBox_OnChange));
+	AddWidget(mpCheckBoxGroupVisibility);
 
 	mpEditor->SetLayoutNeedsUpdate(true);
 }
