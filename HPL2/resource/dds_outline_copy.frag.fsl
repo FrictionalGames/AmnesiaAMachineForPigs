@@ -1,0 +1,23 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+RES(Tex2D(float4), sourceInput, UPDATE_FREQ_PER_FRAME, t0, binding = 1);
+RES(SamplerState, inputSampler, UPDATE_FREQ_NONE, s0, binding = 0);
+
+PUSH_CONSTANT(rootConstant, b2)
+{
+    DATA(float2, blurSize, None);
+};
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    RETURN(SampleTex2D(Get(sourceInput), Get(inputSampler), In.uv.xy));
+}

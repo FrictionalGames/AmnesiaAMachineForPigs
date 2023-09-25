@@ -1,0 +1,43 @@
+/*
+ * Copyright © 2009-2020 Frictional Games
+ *
+ * This file is part of Amnesia: The Dark Descent.
+ *
+ * Amnesia: The Dark Descent is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * Amnesia: The Dark Descent is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Amnesia: The Dark Descent.  If not, see <https://www.gnu.org/licenses/>.
+ */
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+
+RES(SamplerState, inputSampler, UPDATE_FREQ_NONE, s0, binding = 0);
+RES(Tex2D(float4), sourceInput, UPDATE_FREQ_PER_FRAME, t0, binding = 1);
+RES(Tex2D(float4), blurInput, UPDATE_FREQ_PER_FRAME, t1, binding = 2);
+
+PUSH_CONSTANT(rootConstant, b0)
+{
+    DATA(float4, rgbToIntensity, None);
+};
+
+float4 PS_MAIN(PsIn In) 
+{    
+    INIT_MAIN;
+    float4 color = SampleTex2D(Get(sourceInput), Get(inputSampler), In.uv);
+    float4 blurColor = SampleTex2D(Get(blurInput), Get(inputSampler), In.uv);
+    blurColor *= blurColor * dot(blurColor.xyz, Get(rgbToIntensity).xyz);
+    RETURN(color + blurColor);
+}
+

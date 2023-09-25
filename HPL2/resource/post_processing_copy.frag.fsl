@@ -1,0 +1,19 @@
+RES(Tex2D(float4), inputMap, UPDATE_FREQ_PER_DRAW, t0, binding = 0);
+RES(SamplerState, nearestSampler, UPDATE_FREQ_PER_DRAW, s1, binding = 1);
+
+STRUCT(PsIn) 
+{
+	DATA(float4, Position, SV_Position);
+	DATA(float2, uv, TEXCOORD0);
+};
+
+STRUCT(PsOut)
+{
+	DATA(float4, diffuse, SV_Target0);
+};
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    RETURN(SampleTex2D(Get(inputMap), Get(nearestSampler), In.uv.xy));
+}

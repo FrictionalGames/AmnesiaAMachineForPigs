@@ -1,0 +1,36 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+#include "gui_resource.h.fsl"
+
+STRUCT(PsIn)
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float3, pos, POSITION);
+    DATA(float2, TexCoord, TEXCOORD0);
+    DATA(float4, Color, COLOR);
+};
+
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    if(HasClipPlanes(Get(textureConfig)))
+    {
+	    for(int i = 0; i < 4; i++)
+	    {
+	        float d = dot(Get(clipPlane)[i], float4(In.pos, 1.0));
+	        if(d < 0.0)
+	        {
+		        discard;
+	        }
+	    }
+    }
+
+    float4 color = In.Color;      // Get the input color.
+    if(HasDiffuse(Get(textureConfig)))
+    {
+        color *= SampleTex2D(Get(diffuseMap), Get(diffuseSampler), In.TexCoord); // Multiply the color by the texture color.
+    }
+    RETURN(color);
+}

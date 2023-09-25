@@ -1,0 +1,246 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+
+#vert solid_z.vert
+    #include "solid_z.vert.fsl"
+#end
+
+#frag solid_z.frag
+    #define SEARCH_SAMPLE_COUNT 4
+    #define PARALLAX_ENABLED 1
+    #define ALPHA_REJECT 0.5
+    #include "solid_z.frag.fsl"
+#end
+
+#vert gui.vert
+    #include "gui.vert.fsl"
+#end
+
+#frag gui.frag
+    #include "gui.frag.fsl"
+#end
+
+#vert solid_diffuse.vert
+    #include "solid_diffuse.vert.fsl"
+#end
+
+#vert solid_illumination.vert
+    #include "solid_illumination.vert.fsl"
+#end
+
+#frag solid_illumination.frag
+    #include "solid_illumination.frag.fsl"
+#end
+
+#frag solid_diffuse.frag
+    #define ALPHA_REJECT 0.5
+    #include "solid_diffuse.frag.fsl"
+#end
+
+#frag solid_diffuse_parallax.frag
+    // toned down the parallax effect a bit
+
+    #define PARALLAX_ENABLED 1
+    #define SEARCH_SAMPLE_COUNT 4
+    #define ALPHA_REJECT 0.5
+    #include "solid_diffuse.frag.fsl"
+#end
+
+#vert deferred_light.vert
+    #include "deferred_light.vert.fsl"
+#end
+
+#frag deferred_light_pointlight.frag
+    #include "deferred_light_pointlight.frag.fsl"
+#end
+
+#frag deferred_light_stencil.frag
+    #include "deferred_light_stencil.frag.fsl"
+#end
+
+#frag deferred_light_box.frag
+    #include "deferred_light_box.frag.fsl"
+#end
+
+#frag deferred_light_spotlight.frag
+    #include "deferred_light_spotlight.frag.fsl"
+#end
+
+#frag deferred_light_spotlight_med.frag
+    #define SHADOW_JITTER_SIZE 32
+    #define SHADOW_JITTER_SAMPLES 16
+    #include "deferred_light_spotlight.frag.fsl"
+#end
+
+#frag deferred_light_spotlight_high.frag
+    #define SHADOW_JITTER_SIZE 64 
+    #define SHADOW_JITTER_SAMPLES 32
+    #include "deferred_light_spotlight.frag.fsl"
+#end
+
+#vert fullscreen.vert
+    #include "fullscreen.vert.fsl"
+#end
+
+#frag post_processing_copy.frag
+    #include "post_processing_copy.frag.fsl"
+#end
+
+#frag decal.frag
+    #define ALPHA_REJECT 0.01
+    #include "decal.frag.fsl"
+#end
+
+#vert decal.vert
+    #include "decal.vert.fsl"
+#end
+
+// translucency
+#vert translucency.vert
+    #include "translucency.vert.fsl"
+#end
+
+#frag translucency.frag
+    #define ALPHA_REJECT 0.5
+    #include "translucency.frag.fsl"
+#end
+
+// translucency particle
+#vert translucency_particle.vert
+    #include "translucency_particle.vert.fsl"
+#end
+
+#frag translucency_particle.frag
+    #define ALPHA_REJECT 0.5
+    #include "translucency_particle.frag.fsl"
+#end
+
+#frag translucency_water.frag
+    #include "translucency_water.frag.fsl"
+#end
+
+#vert deferred_fog.vert
+    #include "deferred_fog.vert.fsl"
+#end
+
+#frag deferred_fog.frag
+    #include "deferred_fog.frag.fsl"
+#end
+
+#frag deferred_fog_fullscreen.frag
+    #include "deferred_fog_fullscreen.frag.fsl"
+#end
+
+#comp copy_channel_4.comp
+    #include "copy_channel_4.comp.fsl"
+#end
+
+#frag dds_enemy_glow.frag
+    #include "dds_enemy_glow.frag.fsl"
+#end
+
+#vert dds_enemy_glow.vert
+    #include "dds_enemy_glow.vert.fsl"
+#end
+
+#vert dds_outline_stencil.vert
+   #include "dds_outline_stencil.vert.fsl"
+#end
+
+#frag dds_outline_stencil.frag
+    #define ALPHA_REJECT 0.5
+    #include "dds_outline_stencil.frag.fsl"
+#end
+
+#vert dds_outline.vert
+   #include "dds_outline.vert.fsl"
+#end
+
+#frag dds_outline.frag
+    #include "dds_outline.frag.fsl"
+#end
+
+#frag dds_insanity_posteffect.frag
+    #include "dds_insanity_posteffect.frag.fsl"
+#end
+
+#frag blur_posteffect.frag
+    #include "blur_posteffect.frag.fsl"
+#end
+
+#frag dds_inventory_posteffect.frag
+    #include "dds_inventory_posteffect.frag.fsl"
+#end
+
+#frag image_trail_posteffect.frag
+    #include "image_trail_posteffect.frag.fsl" 
+#end
+
+#frag bloom_add_posteffect.frag
+    #include "bloom_add_posteffect.frag.fsl"
+#end
+
+#frag color_conv_posteffect.frag
+    #include "color_conv_posteffect.frag.fsl"
+#end
+
+#frag radial_blur_posteffect.frag
+    #include "radial_blur_posteffect.frag.fsl"
+#end
+
+#comp test_AABB_hi_z.comp
+    #include "test_AABB_hi_z.comp.fsl"
+#end
+
+#comp generate_hi_z.comp
+    #include "generate_hi_z.comp.fsl"
+#end
+
+#frag copy_hi_z.frag
+    #include "copy_hi_z.frag.fsl"
+#end
+
+#vert occlusion_empty.vert
+    #include "occlusion_empty.vert.fsl"
+#end
+
+#frag occlusion_empty.frag
+    #include "occlusion_empty.frag.fsl"
+#end
+
+#vert dds_flash.vert
+    #include "dds_flash.vert.fsl"
+#end
+
+#frag dds_flash.frag
+    #include "dds_flash.frag.fsl"
+#end
+
+#frag dds_outline_copy.frag
+    #include "dds_outline_copy.frag.fsl"
+#end
+
+#comp hbao_prepareNativeDepths.comp
+    #include "hbao_prepareNativeDepths.comp.fsl"
+#end
+
+#comp hbao_courseAO.comp
+    #define SMALL_SCALE_AO_AMOUNT (1)   
+    #define LARGE_SCALE_AO_AMOUNT  (1)
+    #define JITTER_SAMPLES 1
+    #define RADIUS (1.3)
+    #define NUM_DIRECTIONS (9)
+    #define NUM_STEPS (10)
+    #define VIEW_COS_BIAS (0.3)
+    #include "hbao_courseAO.comp.fsl"
+#end
+
+#comp hbao_reinterleave.comp
+    #define POWER_EXP (1.8)
+    #include "hbao_reinterleave.comp.fsl"
+#end
+
+#frag final_posteffect.frag
+    #include "final_posteffect.frag.fsl"
+#end

@@ -1,0 +1,165 @@
+float Fresnel(float afEDotN, float afFresnelBias, float afFresnelPow)
+{
+    float fFacing = 1.0 - afEDotN;
+    return max(afFresnelBias+ (1.0-afFresnelBias)* pow(abs(fFacing),afFresnelPow), 0.0); 
+}
+
+
+float3 WorldSpaceToTangent(float3 dir, float3 normal, float3 tangent, float3 bitangent)
+{
+    float a = dot(tangent, dir);
+    float b = dot(bitangent, dir);
+    float c = dot(normal, dir);
+
+    return float3(a,b,c);
+}
+
+float GetNormalizedDepth(float startDepth, float stopDepth, float inverseDepthRange, float2 uv, bool isHeightMapSingleChannel) {
+    float currentSample  = isHeightMapSingleChannel ? 
+        SampleTex2D(Get(heightMap), Get(materialSampler), uv.xy).r: 
+        SampleTex2D(Get(heightMap), Get(materialSampler), uv.xy).a; 
+    float normalizedDepth = 0.0;
+    if(stopDepth - startDepth > 0.0001)
+    {
+        float minNormalizedDepth = -startDepth * inverseDepthRange;
+        normalizedDepth = max(currentSample, minNormalizedDepth);
+        
+      //  float clampedAbsoluteDepth = max(currentSample, 0.0);
+      //  normalizedDepth = (clampedAbsoluteDepth - startDepth) * inverseDepthRange;
+    }
+    return normalizedDepth; 
+}
+
+float2 ParallaxAdvance(float2 uv,
+    float depthOffset, 
+    float numberOfSteps, 
+    float heightMapScale, 
+    float3 dir, 
+    float3 normal,
+    float3 tangent,
+    float3 bitangent,
+    bool isHeightMapSingleChannel) {
+    
+    const bool isSingleChannel = isHeightMapSingleChannel;
+
+    float3 dirToCameraTS = normalize(WorldSpaceToTangent(dir, normal, tangent, bitangent));
+    
+    float dirToCameraZInverse = 1.0 / dirToCameraTS.z;
+    float step =  float(1.0 / numberOfSteps);
+    float currentStep = 0.0;
+
+    // the amount to shift per step, shift in the inverse direction of dirToCameraTS
+    float3 delta = -dirToCameraTS.xyz * heightMapScale * dirToCameraZInverse * step;
+
+    float depthSearchStart = depthOffset;
+    float depthSearchEnd = depthSearchStart + heightMapScale;
+    float inverseDepthFactor = 1.0 / heightMapScale;
+    
+    // This is the relative position at which we begin searching for intersection.
+    // It is adjusted according to the depthOffset, raising or lowering the whole surface by depthOffset units.
+    float3 parallaxOffset = -dirToCameraTS.xyz * dirToCameraZInverse * depthOffset;
+    
+    float currentSample  = isSingleChannel ? 
+        SampleTex2D(Get(heightMap), Get(materialSampler), uv.xy + parallaxOffset.xy).r: 
+        SampleTex2D(Get(heightMap), Get(materialSampler), uv.xy + parallaxOffset.xy).a; 
+    float prevSample;
+
+    // Do a basic search for the intersect step
+    while(currentSample > currentStep) {
+        currentStep += step;
+        parallaxOffset += delta;
+                
+        prevSample = currentSample;
+        currentSample = GetNormalizedDepth(depthSearchStart, depthSearchEnd, inverseDepthFactor, uv.xy + parallaxOffset.xy, isHeightMapSingleChannel);
+    }
+
+    if(currentStep > 0.0)
+    {
+        // Contact refinement propose by Andrea Riccardi 
+        // https://www.artstation.com/andreariccardi/blog/3VPo/a-new-approach-for-parallax-mapping-presenting-the-contact-refinement-parallax-mapping-technique
+
+        // Based on the rough approximation, rolling back to the previous step along the ray.
+        parallaxOffset -= delta;
+        currentStep -= step;
+        currentSample = prevSample;
+
+        // Adjust precision
+        float3 adjustedDelta = delta * step;
+        float adjustedStep = step * step;
+
+        // Uses another loop with the same step numbers, this times only covers the distance between previous point and the rough intersection point.
+        while(currentSample > currentStep)
+        {
+            currentStep += adjustedStep;
+            parallaxOffset += adjustedDelta;
+            prevSample = currentSample;
+
+            currentSample = GetNormalizedDepth(depthSearchStart, depthSearchEnd, inverseDepthFactor, uv.xy + parallaxOffset.xy, isHeightMapSingleChannel);
+
+        }
+    }
+    if(parallaxOffset.z > 0.0)
+    {
+        parallaxOffset = float3(0,0,0);
+    }
+    return parallaxOffset.xy; 
+}
+
+float2 ParallaxRelief(
+    int sampleCount, 
+    bool isSingleChannel, 
+    float heightMapScale, 
+    float3 normalizedNormal, 
+    float2 uv,
+    float3 modelViewNormalizedDir,
+    SamplerState samplerState, 
+    Tex2D(float4) tex) {
+    //Get give normalizedView the length so it reaches bottom.
+    float normalLength = 1.0 / modelViewNormalizedDir.z;
+    modelViewNormalizedDir *= float3(normalLength, normalLength, normalLength);	
+    modelViewNormalizedDir.xy *= heightMapScale;
+
+    //Apply scale and bias
+
+    float3 heightMapPos = float3(uv.xy, 0.0);
+
+    //Determine number of steps based on angle between normal and eye
+    int iterations = clamp(int(floor((1.0 - dot(modelViewNormalizedDir, normalizedNormal) ) * 18.0)) + 2, 0, 18); 
+   
+    if(iterations == 0) {
+        return uv.xy;
+    }
+
+    // Do a linear search to find the first intersection
+    {
+        modelViewNormalizedDir /= float(iterations);
+        for(int i = 0; i < (iterations - 1); i++) 
+        { 
+
+            float fDepth = isSingleChannel ? 
+                SampleTex2D(tex, samplerState, heightMapPos.xy).r: 
+                SampleTex2D(tex, samplerState, heightMapPos.xy).a; 
+            if(heightMapPos.z < fDepth) {
+                heightMapPos += modelViewNormalizedDir;
+            }
+        } 
+    }
+
+    // Do a binary search to find the exact intersection
+    {
+        for(int i=0; i < sampleCount; i++) 
+        {
+            float fDepth = isSingleChannel ?  
+                SampleTex2D(tex, samplerState, heightMapPos.xy).r:
+                SampleTex2D(tex, samplerState, heightMapPos.xy).a;
+            if(heightMapPos.z < fDepth) {
+                heightMapPos += modelViewNormalizedDir; 
+            }
+
+            modelViewNormalizedDir *= 0.5; 
+            heightMapPos -= modelViewNormalizedDir; 
+        }
+    }
+
+    return heightMapPos.xy;
+}

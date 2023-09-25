@@ -1,0 +1,42 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+
+#ifndef _MATERIAL_RESOURCE_H_
+#define _MATERIAL_RESOURCE_H_
+
+
+#define DiffuseFlag (1 << 0)
+#define NormalFlag (1 << 1)
+#define SpecularFlag (1 << 2)
+#define AlphaFlag (1 << 3)
+#define HeightFlag (1 << 4)
+#define IlluminationFlag (1 << 5)
+#define CubMapFlag (1 << 6)
+#define DissolveAlphaFlag (1 << 7)
+#define CubeMapAlphaFlag (1 << 8)
+#define TextureFlags (DiffuseFlag | NormalFlag | SpecularFlag |  AlphaFlag | HeightFlag | IlluminationFlag | CubMapFlag | DissolveAlphaFlag | CubeMapAlphaFlag)
+
+// default resource flags
+INLINE bool HasDiffuse(uint _textureConfig)        { return (_textureConfig & (1 << 0)) != 0; }
+INLINE bool HasNormal(uint  _textureConfig)         { return (_textureConfig & (1 << 1)) != 0; }
+INLINE bool HasSpecular(uint  _textureConfig)       { return (_textureConfig & (1 << 2)) != 0; }
+INLINE bool HasAlpha(uint  _textureConfig)          { return (_textureConfig & (1 << 3)) != 0; }
+INLINE bool HasHeight(uint _textureConfig)         { return (_textureConfig & (1 << 4)) != 0; }
+INLINE bool HasIllumination(uint _textureConfig)   { return (_textureConfig & (1 << 5)) != 0; }
+INLINE bool HasCubeMap(uint _textureConfig)        { return (_textureConfig & (1 << 6)) != 0; }
+INLINE bool HasDissolveAlpha(uint _textureConfig)  { return (_textureConfig & (1 << 7)) != 0; }
+INLINE bool HasCubeMapAlpha(uint _textureConfig)   { return (_textureConfig & (1 << 8)) != 0; }
+
+
+
+INLINE bool IsHeightMapSingleChannel(uint _textureConfig)   { return (_textureConfig & (1 << 9)) != 0; }
+INLINE bool IsAlphaSingleChannel(uint _textureConfig)   { return (_textureConfig & (1 << 10)) != 0; }
+
+// Material Soild
+INLINE bool HasDissolveFilter(uint _textureConfig)   { return (_textureConfig & (1 << 14)) != 0; }
+
+// Translucent
+INLINE bool UseRefractionNormals(uint _textureConfig)   { return (_textureConfig & (1 << 14)) != 0; }
+INLINE bool UseRefractionEdgeCheck(uint _textureConfig)   { return (_textureConfig & (1 << 15)) != 0; }
+#endif

@@ -1,0 +1,74 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+#define MATERIAL_SOLID 1
+#include "deferred_resources.h.fsl"
+#include "deferred_common.h.fsl"
+
+STRUCT(PsIn) 
+{
+	DATA(float4, Position, SV_Position);
+	DATA(float3, pos, POSITION);
+	DATA(float2, uv, TEXCOORD0);
+    DATA(float3, normal, NORMAL);
+    DATA(float3, tangent, TANGENT);
+    DATA(float3, bitangent, BITANGENT);
+};
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    float2 texCoord = In.uv.xy;
+    uint materialID = Get(uniformObjectBuffer)[Get(objectId)].materialID;
+    
+    #ifdef PARALLAX_ENABLED
+        if(HasHeight(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+            texCoord.xy += ParallaxAdvance(texCoord,
+                0.0,
+                16.0, 
+                Get(uniformMaterialBuffer)[materialID].heightMapScale * PARALAX_MULTIPLIER,
+                In.pos,
+                In.normal,
+                In.tangent,
+                In.bitangent,
+                IsHeightMapSingleChannel(Get(uniformMaterialBuffer)[materialID].materialConfig));
+        }
+    #endif    
+    
+    float diffuseAlpha;
+    if(HasAlpha(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+        if(IsAlphaSingleChannel(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+            diffuseAlpha = SampleTex2D(Get(alphaMap), Get(materialSampler), texCoord.xy).r;
+        } else {
+            diffuseAlpha = SampleTex2D(Get(alphaMap), Get(materialSampler), texCoord.xy).a;
+        }
+    } else {
+        diffuseAlpha = 1.0;
+    }
+
+    const float dissolveAmount = Get(uniformObjectBuffer)[Get(objectId)].dissolveAmount;
+
+    if(dissolveAmount < 1.0 || HasDissolveAlpha(Get(uniformMaterialBuffer)[materialID].materialConfig) || HasDissolveFilter(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+        float2 vDissolveCoords = In.Position.xy * (1.0/128.0); //128 = size of dissolve texture.
+        float fDissolve = SampleTex2D(dissolveMap, Get(dissolveSampler), vDissolveCoords).x;
+        
+        if(HasDissolveAlpha(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+            //Get in 0.75 - 1 range
+            fDissolve = fDissolve*0.25 + 0.75;
+
+            float fDissolveAlpha = SampleTex2D(Get(dissolveAlphaMap), Get(materialSampler), texCoord.xy).r;
+            fDissolve -= (0.25 - fDissolveAlpha * 0.25);
+        } else {
+            //Get in 0.5 - 1 range.
+            fDissolve = fDissolve*0.5 + 0.5;
+        }
+        diffuseAlpha = fDissolve -  (1.0 - (dissolveAmount * diffuseAlpha)) * 0.5;
+    }
+
+    
+    if(diffuseAlpha < ALPHA_REJECT) {
+        discard;
+    }
+
+    RETURN(float4(0,0,0,0));
+}

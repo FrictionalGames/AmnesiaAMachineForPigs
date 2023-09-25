@@ -1,0 +1,28 @@
+#define MATERIAL_SOLID 1
+#include "deferred_resources.h.fsl"
+#include "deferred_common.h.fsl"
+
+STRUCT(VSInput)
+{
+	DATA(float3, Position, POSITION);
+	DATA(float2, TexCoord, TEXCOORD0);
+};
+
+STRUCT(VSOutput)
+{
+	DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+VSOutput VS_MAIN(VSInput In)
+{
+    INIT_MAIN;
+    VSOutput Out;
+
+    float4x4 modelView = mul(Get(viewMat), Get(uniformObjectBuffer)[Get(objectId)].modelMat);
+    float4x4 modelViewPrj = mul(Get(projMat), modelView);
+    
+    Out.Position = mul(modelViewPrj, float4(In.Position.xyz, 1.0));
+    Out.uv = mul(Get(uniformObjectBuffer)[Get(objectId)].uvMat, float4(In.TexCoord, 0, 1.0)).xy;
+    RETURN(Out);
+}

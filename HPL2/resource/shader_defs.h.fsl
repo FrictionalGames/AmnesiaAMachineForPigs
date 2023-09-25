@@ -1,0 +1,7 @@
+
+
+CBUFFER(PerFrameConstants, UPDATE_FREQ_PER_FRAME, b0, binding = 0)
+{
+    DATA(float4x4, viewMatrix, None);
+    DAtA(float4x4, projectionMatrix, None);
+}

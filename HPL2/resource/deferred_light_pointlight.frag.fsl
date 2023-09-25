@@ -1,0 +1,49 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+#define POINT_LIGHT 1
+#include "deferred_light_resource.h.fsl"
+
+STRUCT(PsIn)
+{
+    DATA(float4, Position, SV_Position);
+};
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    bool isSpecular = Get(lightObjectBuffer)[Get(lightId)].lightColor.w > 0.0;
+    
+    float4 color =  LoadTex2D(Get(diffuseMap), Get(pointSampler), uint2(In.Position.xy), 0);
+    float3 normal = LoadTex2D(Get(normalMap), Get(pointSampler), uint2(In.Position.xy), 0).xyz;
+    float3 position =  LoadTex2D(Get(positionMap), Get(pointSampler), uint2(In.Position.xy), 0).xyz;
+    float2 specular =  LoadTex2D(Get(specularMap), Get(pointSampler), uint2(In.Position.xy), 0).xy;
+
+    float3 lightDir = (Get(lightObjectBuffer)[Get(lightId)].lightPos.xyz -  position) * (1.0 / Get(lightObjectBuffer)[Get(lightId)].lightRadius);
+    float attenuation = SampleTex1D(Get(attenuationLightMap), Get(nearestSampler), dot(lightDir, lightDir)).x;
+    
+    float3 normalLightDir = normalize(lightDir);
+    float3 normalizedNormal = normalize(normal.xyz);
+
+    float3 goboVal = float3(1.0, 1.0, 1.0);
+    if(HasGoboMap(Get(lightObjectBuffer)[Get(lightId)].config)) {
+        float4 worldLightDir = mul(Get(lightObjectBuffer)[Get(lightId)].invViewRotation, float4(normalLightDir.xyz,1.0));
+        goboVal = SampleTexCube(Get(goboCubeMap), Get(goboSampler), worldLightDir.xyz).xyz;
+    }
+    
+    /////////////////////////////////
+    ////Calculate diffuse color
+    float fLDotN = max(dot((isSpecular ? normalizedNormal : normal), normalLightDir), 0.0);
+    float3 diffuseColor = color.xyz * Get(lightObjectBuffer)[Get(lightId)].lightColor.xyz * fLDotN;
+
+    float3 specularColor = float3(0.0, 0.0, 0.0);
+    if(isSpecular) {
+        float3 halfVec = normalize(normalLightDir + normalize(-position));
+        float specIntensity = specular.x;
+        float specPower = exp2(specular.y * 10.0) + 1.0;
+        float specularValue = Get(lightObjectBuffer)[Get(lightId)].lightColor.w * specIntensity *  pow( clamp( dot( halfVec, normalizedNormal), 0.0, 1.0), specPower );
+        specularColor = specularValue.xxx * Get(lightObjectBuffer)[Get(lightId)].lightColor.xyz;
+    }
+    float4 result = float4((diffuseColor + specularColor) * goboVal * attenuation, 1.0);
+    RETURN(result);
+}

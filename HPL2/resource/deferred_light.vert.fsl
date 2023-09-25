@@ -1,0 +1,24 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+
+#define LIGHT_COMMON
+#include "deferred_light_resource.h.fsl"
+
+STRUCT(VSInput)
+{
+	DATA(float3, Position, POSITION);
+};
+
+STRUCT(VSOutput)
+{
+	DATA(float4, Position, SV_Position);
+};
+
+VSOutput VS_MAIN(VSInput In)
+{
+    INIT_MAIN;
+    VSOutput Out;
+    Out.Position = mul(Get(lightObjectBuffer)[Get(lightId)].mvp, float4(In.Position.xyz, 1.0));
+    RETURN(Out);
+}

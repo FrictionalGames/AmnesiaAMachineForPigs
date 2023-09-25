@@ -1,0 +1,31 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+#include "deferred_fog.resource.h.fsl"
+
+STRUCT(VSInput)
+{
+    DATA(float3, Position, POSITION);
+};
+
+STRUCT(VSOutput)
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float4, pos, POSITION);
+    DATA(float3, ray, TEXCOORD0);
+
+    DATA(FLAT(uint), drawId, TEXCOORD1);
+};
+
+VSOutput VS_MAIN(VSInput In, SV_InstanceID(uint) InstanceID )
+{
+    INIT_MAIN;
+    VSOutput Out;
+    uint instanceIndex = InstanceID + Get(instanceOffset);
+
+    Out.Position = mul(Get(uniformFogBuffer)[instanceIndex].mvp, float4(In.Position.xyz, 1.0));
+    Out.pos = mul(Get(uniformFogBuffer)[instanceIndex].mv, float4(In.Position.xyz, 1.0));
+    Out.ray = mul(Get(uniformFogBuffer)[instanceIndex].invViewModelRotation, float4(Out.pos.xyz, 1.0)).xyz;
+    Out.drawId = instanceIndex;
+    RETURN(Out);
+}

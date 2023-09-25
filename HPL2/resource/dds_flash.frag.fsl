@@ -1,0 +1,28 @@
+STRUCT(PsIn)
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+    DATA(float3, normal, NORMAL);
+};
+
+CBUFFER(uniformBlock, UPDATE_FREQ_PER_FRAME, b0, binding = 0) {
+    DATA(float4, colorMul, None);
+    DATA(float4x4, mvp, None);
+    DATA(float3x3, normalMat, None);
+};
+
+RES(Tex2D(float4), diffuseMap, UPDATE_FREQ_PER_FRAME, t0, binding = 1); 
+RES(SamplerState, diffuseSampler, UPDATE_FREQ_NONE, s0, binding = 2);
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    float rightLight = dot(In.normal, float3(0.0, 0.0, -1.0));
+    rightLight = 1.0 - abs(rightLight);
+    float4 color = SampleTex2D(Get(diffuseMap), Get(diffuseSampler), In.uv);
+    
+    if(color.w < 0.5)
+            discard;
+    
+    RETURN(color * float4(0.5, 0.5, 1.0, 0.0) * rightLight * Get(colorMul));
+}

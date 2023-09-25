@@ -1,0 +1,133 @@
+/**
+* Copyright 2023 Michael Pollind
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*     http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+#define MATERIAL_WATER 1
+#include "deferred_resources.h.fsl"
+#include "deferred_common.h.fsl"
+
+#define WAVE_AMPLITUDE_SCALE 0.04
+#define WAVE_FREQUENCY_SCALE 10.0
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float3, pos, POSITION);
+    DATA(float2, uv, TEXCOORD0);
+    DATA(float3, normal, NORMAL);
+    DATA(float3, tangent, TANGENT);
+    DATA(float3, bitangent, BITANGENT);
+    DATA(float4, color, COLOR);
+};
+
+STRUCT(PsOut)
+{
+    DATA(float4, diffuse, SV_Target0);
+};
+
+
+PsOut PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    PsOut Out;
+    uint materialID = Get(uniformObjectBuffer)[Get(objectId)].materialID;
+    
+    float waveAft = Get(afT) * Get(uniformMaterialBuffer)[materialID].waveSpeed;
+    float waveAmplitude = Get(uniformMaterialBuffer)[materialID].waveAmplitude * WAVE_AMPLITUDE_SCALE;
+    float waveFrequency = Get(uniformMaterialBuffer)[materialID].waveFreq * WAVE_FREQUENCY_SCALE;
+
+    ///////////////////////////////
+    //Get the two uv coords
+    float fT1 = waveAft * 0.8;
+    float2 vUv1 = In.uv + waveAft * 0.01f;
+    vUv1.x += sin(fT1 + vUv1.y * waveFrequency) * waveAmplitude;
+    vUv1.y += sin(fT1 + vUv1.x * waveFrequency) * waveAmplitude; 
+
+    float fT2 = waveAft * -2.6;
+    float2 vUv2 = In.uv + waveAft * -0.012f;
+    vUv2.x += sin(fT2 + vUv2.y * waveFrequency * 1.2) * waveAmplitude * 0.75;
+    vUv2.y += sin(fT2 + vUv2.x * waveFrequency * 1.2) * waveAmplitude * 0.75;
+
+    ///////////////////////////////
+    //Get the normals and combine into final normal
+    // (No need for full unpack since there is a normalize later)
+    float3 vNormal1 = SampleTex2D(Get(normalMap), Get(materialSampler), vUv1).xyz - 0.5;
+    float3 vNormal2 = SampleTex2D(Get(normalMap), Get(materialSampler), vUv2).xyz - 0.5;
+
+    float3 vFinalNormal = normalize(vNormal1*0.7 + vNormal2*0.3);
+
+    ///////////////////////////////
+    //Get the diffuse color
+    float4 surfaceColor  = SampleTex2D(Get(diffuseMap), Get(materialSampler), vUv1);
+
+    float4 vRefractionColor = float4(1,1,1,1);
+    float2 vDistortedScreenPos = float2(0.0,0.0);
+    if(UseRefractionTrans(Get(options))) {
+        float fInvDist = min(1.0 / In.pos.z, 10.0);
+        vDistortedScreenPos = In.Position.xy  + (Get(viewportSize).x * vFinalNormal.xy * Get(uniformMaterialBuffer)[materialID].refractionScale * fInvDist );
+        vRefractionColor = SampleTex2D(Get(refractionMap), Get(refractionSampler), vDistortedScreenPos * Get(viewTexel));
+      //  if(vRefractionColor.a < 0.5) {
+      //      vRefractionColor = SampleTex2D(Get(refractionMap), Get(nearestSampler), In.Position.xy * Get(viewTexel));
+      //  }
+     }
+
+
+    float4 vReflectionColor = float4(1.0,1.0,1.0,1.0);
+    float fFresnel = 1.0;
+    if(UseReflectionTrans(Get(options))) {
+        //////////////////
+        //Fresnel
+        float3 vScreenNormal = normalize(vFinalNormal.x * In.tangent + vFinalNormal.y * In.bitangent + vFinalNormal.z * In.normal);
+        float3 vEyeVec = normalize(In.pos);
+
+        float afEDotN = max(dot(-vEyeVec, vScreenNormal),0.0);
+        fFresnel = Fresnel(afEDotN, Get(uniformMaterialBuffer)[materialID].frenselBias, Get(uniformMaterialBuffer)[materialID].frenselPow);
+
+        if(Get(uniformMaterialBuffer)[materialID].reflectionFadeEnd > 0) {
+            float refractionFadeLength = Get(uniformMaterialBuffer)[materialID].reflectionFadeEnd - Get(uniformMaterialBuffer)[materialID].reflectionFadeStart;  
+            fFresnel *= 1.0 - clamp( (In.pos.z - Get(uniformMaterialBuffer)[materialID].reflectionFadeStart) / refractionFadeLength, 0.0, 1.0);
+        }
+
+        //////////////////
+        //Cubemap
+        if(HasCubeMap(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+            float3 vEnvUv = reflect(vEyeVec, vScreenNormal);
+            vEnvUv = mul(Get(invViewRotationMat), float4(vEnvUv.x, vEnvUv.y, vEnvUv.z, 1)).xyz;
+            vReflectionColor = SampleTexCube(Get(cubeMap),  Get(materialSampler), vEnvUv);
+        } else {
+            vReflectionColor = SampleTex2D(Get(reflectionMap)[ReflectionBuffer(Get(options))], Get(nearestSampler), vDistortedScreenPos * Get(viewTexel));
+        }
+    }
+
+
+    float3 vLightDir = normalize(float3(0.5, 0.5, 0.5));
+    float fLDotN = max(dot(vLightDir, vFinalNormal),0.0);
+    float fDiffuse =  fLDotN * 0.5 + 0.5;
+    float fSpecular = pow(fLDotN,16.0);
+
+    float fFogAmount = 0.0;
+    if (UseFog(Get(options))) {
+            fFogAmount = (-In.pos.z - Get(worldFogStart)) /Get(worldFogLength);
+            fFogAmount = clamp(fFogAmount, 0.0, 1.0);
+            fFogAmount = pow(fFogAmount, Get(fogFalloffExp)) * Get(worldFogColor).a;
+    } 
+
+    if (UseReflectionTrans(Get(options))) {
+        Out.diffuse.rgb = (surfaceColor.xyz * vRefractionColor.xyz + vReflectionColor.xyz * fFresnel) * (1.0-fFogAmount) + Get(worldFogColor).xyz*fFogAmount;
+    } else {
+        Out.diffuse.rgb = (surfaceColor.xyz * vRefractionColor.xyz * fDiffuse + float3(fSpecular, fSpecular, fSpecular)) * (1.0-fFogAmount) + Get(worldFogColor).xyz*fFogAmount;
+    }
+
+    Out.diffuse.w = 1.0;
+    RETURN(Out);
+}

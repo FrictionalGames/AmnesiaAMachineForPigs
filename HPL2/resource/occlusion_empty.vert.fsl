@@ -1,0 +1,25 @@
+
+STRUCT(VSInput)
+{
+    DATA(float3, Position, POSITION);
+};
+
+STRUCT(VSOutput)
+{
+    DATA(float4, Position, SV_Position);
+};
+
+PUSH_CONSTANT(rootConstant, b0)
+{
+    DATA(uint, objectIndex, None);
+};
+
+RES(Buffer(float4x4), occlusionObjectBuffer, UPDATE_FREQ_NONE, t0, binding = 0);
+
+VSOutput VS_MAIN( VSInput In )
+{
+    INIT_MAIN;
+    VSOutput Out;
+    Out.Position = mul(Get(occlusionObjectBuffer)[Get(objectIndex)], float4(In.Position.xyz, 1.0));
+    RETURN(Out);
+}

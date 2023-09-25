@@ -1,0 +1,39 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+PUSH_CONSTANT(rootConstant, b0)
+{
+    DATA(float2, blurSize, None);
+};
+
+RES(SamplerState, inputSampler, UPDATE_FREQ_NONE, s0, binding = 0);
+RES(Tex2D(float4), sourceInput, UPDATE_FREQ_PER_FRAME, t0, binding = 1);
+
+float4 PS_MAIN(PsIn In) 
+{    
+    INIT_MAIN;
+    uint2 screenSize = uint2(GetDimensions(Get(sourceInput), NO_SAMPLER));    
+
+    float3 color = SampleTex2D(sourceInput, Get(inputSampler), In.uv).rgb;
+    
+    float3 colorToR = float3(0.39,  0.769, 0.189);
+    float3 colorToG = float3(0.349, 0.686, 0.168);
+    float3 colorToB = float3(0.272, 0.534, 0.131);
+    
+    float intensity = 0.35;
+    
+    float3 vFinalCol;
+    vFinalCol.x = dot(color, colorToR) * intensity;
+    vFinalCol.y = dot(color, colorToG) * intensity;
+    vFinalCol.z = dot(color, colorToB) * intensity;
+    
+    RETURN(float4(pow(vFinalCol.rgb, float3(1.5, 1.5, 1.5)), 1.0));
+}
+

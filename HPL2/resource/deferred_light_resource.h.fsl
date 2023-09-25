@@ -1,0 +1,87 @@
+
+#ifdef LIGHT_COMMON 
+    STRUCT(LightObject) {
+        DATA(float4x4, mvp, none); 
+        DATA(uint, config, none);
+        DATA(uint, __pad0[3], none);
+
+        DATA(uint, __pad1[28], none);
+    };
+#elif defined(BOX_LIGHT)
+    STRUCT(LightObject) {
+        DATA(float4x4, mvp, none);
+        
+        DATA(uint, config, none);
+        DATA(uint, __pad0[3], none);
+
+        DATA(float4, lightColor, none);
+        
+        DATA(uint, __pad1[24], none);
+    };
+#elif defined(SPOT_LIGHT)
+    STRUCT(LightObject) {
+        // common data make sure to match with light_common
+        DATA(float4x4, mvp, none); 
+        
+        DATA(uint, config, none); 
+        DATA(uint, __pad0[3], none);
+        
+        DATA(float3, lightForward, none); 
+        DATA(float, oneMinusCosHalfSpotFov, none);  
+        
+        DATA(float4x4, spotViewProj, none);
+        DATA(float4, lightColor, none);
+
+        DATA(float3, lightPos, none);
+        DATA(float, lightRadius, none);
+    };
+#elif defined(POINT_LIGHT)
+    STRUCT(LightObject) {
+        DATA(float4x4, mvp, none);
+        
+        DATA(uint, config, none);
+        DATA(uint, __pad0, none);
+        DATA(uint, __pad1, none);
+        DATA(uint, __pad2, none);
+        
+        DATA(float4x4, invViewRotation, none);
+        
+        DATA(float3, lightPos, none);
+        DATA(float, lightRadius, none);
+        
+        DATA(float4, lightColor, none);
+
+        DATA(float4, __pad3, none);
+    };
+#else
+    #error not defined
+#endif
+
+PUSH_CONSTANT(lightPushConstant, b0)
+{
+    DATA(uint, lightId, None);
+};
+
+
+RES(Buffer(LightObject), lightObjectBuffer, UPDATE_FREQ_PER_FRAME, t0, binding = 0);
+RES(Tex2D(float4), diffuseMap, UPDATE_FREQ_PER_FRAME, t1, binding = 1); 
+RES(Tex2D(float4), normalMap, UPDATE_FREQ_PER_FRAME, t2, binding = 2);
+RES(Tex2D(float4), positionMap, UPDATE_FREQ_PER_FRAME, t3, binding = 3);
+RES(Tex2D(float2), specularMap, UPDATE_FREQ_PER_FRAME, t4, binding = 4);
+
+RES(SamplerComparisonState, shadowCmpSampler, UPDATE_FREQ_NONE, s1, binding = 14);
+RES(SamplerState, pointSampler, UPDATE_FREQ_NONE, s2, binding = 16);
+RES(SamplerState, goboSampler, UPDATE_FREQ_NONE, s3, binding = 17);
+RES(SamplerState, nearestSampler, UPDATE_FREQ_NONE, s4, binding = 8);
+
+RES(Tex2D(float), shadowOffsetMap, UPDATE_FREQ_PER_BATCH, t5, binding = 15);
+RES(Tex1D(float4), attenuationLightMap, UPDATE_FREQ_PER_BATCH, t6, binding = 9);
+RES(TexCube(float4), goboCubeMap, UPDATE_FREQ_PER_BATCH, t7, binding = 10);
+RES(Tex2D(float4), goboMap, UPDATE_FREQ_PER_BATCH, t8, binding = 11);
+RES(Tex1D(float4), falloffMap, UPDATE_FREQ_PER_BATCH, t9, binding = 12);
+RES(Tex2D(float), shadowMap, UPDATE_FREQ_PER_BATCH, t10, binding = 13);
+
+
+INLINE bool HasGoboMap(uint _config)        { return (_config & (1 << 0)) != 0; }
+INLINE bool HasShadowMap(uint _config)        { return (_config & (1 << 1)) != 0; }
+

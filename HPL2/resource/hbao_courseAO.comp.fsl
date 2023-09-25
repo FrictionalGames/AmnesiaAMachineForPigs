@@ -1,0 +1,207 @@
+// This code contains NVIDIA Confidential Information and is disclosed to you
+// under a form of NVIDIA software license agreement provided separately to you.
+//
+// Notice
+// NVIDIA Corporation and its licensors retain all intellectual property and
+// proprietary rights in and to this software and related documentation and
+// any modifications thereto. Any use, reproduction, disclosure, or
+// distribution of this software and related documentation without an express
+// license agreement from NVIDIA Corporation is strictly prohibited.
+//
+// ALL NVIDIA DESIGN SPECIFICATIONS, CODE ARE PROVIDED "AS IS.". NVIDIA MAKES
+// NO WARRANTIES, EXPRESSED, IMPLIED, STATUTORY, OR OTHERWISE WITH RESPECT TO
+// THE MATERIALS, AND EXPRESSLY DISCLAIMS ALL IMPLIED WARRANTIES OF NONINFRINGEMENT,
+// MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE.
+//
+// Information and code furnished is believed to be accurate and reliable.
+// However, NVIDIA Corporation assumes no responsibility for the consequences of use of such
+// information or for any infringement of patents or other rights of third parties that may
+// result from its use. No license is granted by implication or otherwise under any patent
+// or patent rights of NVIDIA Corporation. Details are subject to change without notice.
+// This code supersedes and replaces all information previously supplied.
+// NVIDIA Corporation products are not authorized for use as critical
+// components in life support devices or systems without express written approval of
+// NVIDIA Corporation.
+//
+// Copyright (c) 2008-2021 NVIDIA Corporation. All rights reserved.
+
+// Copyright 2023 Michael Pollind
+
+
+
+/**
+* Copyright 2023 Michael Pollind
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*     http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+#include "hbao_resource.h.fsl"
+
+float ComputeAO(float3 viewPosKernelCenter, float3 viewSpaceKernalNormal, float3 viewSpaceSamplePos, float negInvR2)
+{
+    float3 viewKernalDir = viewSpaceSamplePos - viewPosKernelCenter;
+    float viewKernalDirMagnitude = dot(viewKernalDir , viewKernalDir );
+    float viewCos = dot(viewSpaceKernalNormal, viewKernalDir) * rsqrt(viewKernalDirMagnitude);
+
+    // Use saturate(x) instead of max(x,0.f) because that is faster
+    float falloff = viewKernalDirMagnitude * negInvR2 + 1.0;
+    return saturate(viewCos - VIEW_COS_BIAS) * saturate(falloff);
+}
+
+void AccumulateAO(
+    inout float AO,
+    inout float rayPixel,
+    uint sliceIndex,
+    uint2 fullResPos,
+    float StepSizePixels,
+    float2 direction,
+    float3 viewPosKernelCenter, 
+    float3 viewNormalKernelCenter,
+    float negInvR2
+)
+{
+    uint2 samplePos = clamp(uint2(round(rayPixel * direction) + fullResPos), uint2(0, 0), Get(viewportDim).xy - uint2(1, 1));
+    float2 normalizedSamplePos = (float2(samplePos) + float2(0.5, 0.5)) * Get(viewportTexel);
+
+    float viewDepth = LoadRWTex3D(Get(prepareDepths), uint3(floor(samplePos.xy / 4.0), sliceIndex)).r;
+    float3 viewPos = ComputeViewspacePosition(normalizedSamplePos, viewDepth);
+    rayPixel += StepSizePixels;
+    AO += ComputeAO(viewPosKernelCenter, viewNormalKernelCenter, viewPos, negInvR2);
+}
+
+// the first two values are cos(rand), sin(rand) and rand
+STATIC const float3 JITTER[32] = { 
+     float3(0.99119387704715, 0.1324186471167839, 0.8789781044196688),
+     float3(0.9951085281046705, 0.09878773857800473, 0.6717369021173125),
+     float3(0.9619403782691786, 0.2732594164074674, 0.031370069190888694),
+     float3(0.9932972716170069, 0.1155877597248517, 0.12694944822347798),
+     float3(0.9530320708614084, 0.30286939744651575, 0.8635004448099001),
+     float3(0.99119387704715, 0.1324186471167839, 0.8789781044196688),
+     float3(0.9837813593746079, 0.1793717841441309, 0.9096760935635397),
+     float3(0.9522979598421211, 0.3051697817290138, 0.422689892507499),
+     float3(0.9332713936288961, 0.3591719725061772, 0.37136344164461),
+     float3(0.9593267156654712, 0.28229816260560403, 0.690268942677605),
+     float3(0.9807385601406718, 0.19532505382874432, 0.4389850019224203),
+     float3(0.9938594170665236, 0.1106501654232378, 0.7244546322162781),
+     float3(0.9951085281046705, 0.09878773857800473, 0.6717369021173125),
+     float3(0.9619403782691786, 0.2732594164074674, 0.031370069190888694),
+     float3(0.9932972716170069, 0.1155877597248517, 0.12694944822347798),
+     float3(0.9738096326160937, 0.227364903677126, 0.8709658361988128),
+     float3(0.9690078195547853, 0.24703005007828605, 0.5452133789889245),
+     float3(0.9738096326160937, 0.227364903677126, 0.8709658361988128),
+     float3(0.9690078195547853, 0.24703005007828605, 0.5452133789889245),
+     float3(0.9947149244060405, 0.10267530941704105,0.1653413480379453),
+     float3(0.9901008912383048, 0.14035749060564778, 0.5441034027939922),
+     float3(0.9947149244060405, 0.10267530941704105,0.1653413480379453),
+     float3(0.9901008912383048, 0.14035749060564778, 0.5441034027939922),
+     float3(0.9431490407173596, 0.3323701054456075, 0.7981023606982642),
+     float3(0.9530320708614084, 0.30286939744651575, 0.8635004448099001),
+     float3(0.9837813593746079, 0.1793717841441309, 0.9096760935635397),
+     float3(0.9522979598421211, 0.3051697817290138, 0.422689892507499),
+     float3(0.9332713936288961, 0.3591719725061772, 0.37136344164461),
+     float3(0.9431490407173596, 0.3323701054456075, 0.7981023606982642),
+     float3(0.9593267156654712, 0.28229816260560403, 0.690268942677605),
+     float3(0.9807385601406718, 0.19532505382874432, 0.4389850019224203),
+     float3(0.9938594170665236, 0.1106501654232378, 0.7244546322162781)
+};
+
+float2 RotateDirection(float2 V, float2 RotationCosSin)
+{
+    // RotationCosSin is (cos(alpha),sin(alpha)) where alpha is the rotation angle
+    // A 2D rotation matrix is applied (see https://en.wikipedia.org/wiki/Rotation_matrix)
+    return float2(V.x*RotationCosSin.x - V.y*RotationCosSin.y,
+                  V.x*RotationCosSin.y + V.y*RotationCosSin.x);
+}
+
+NUM_THREADS(16, 16, 1)
+void CS_MAIN(SV_DispatchThreadID(uint3) did) 
+{
+    INIT_MAIN;
+    if (did.x < Get(quarterViewportDim).x && did.y < Get(quarterViewportDim).y) {
+        const float radiusToScreen = RADIUS * (0.5 / Get(tanHalfFOV)) * Get(viewportDim).y;
+
+        const uint sliceIndex = did.z;
+        const uint2 fullResPos = uint2(did.x * 4 + (sliceIndex % 4), did.y * 4 + uint(sliceIndex / 4));
+        const uint2 quarterResPos = did.xy;
+
+        const float2 normalizedScreenPos = (float2(fullResPos) + float2(0.5, 0.5)) * Get(viewportTexel);
+
+        float viewDepth = LoadRWTex3D(Get(prepareDepths), uint3(did.xy, sliceIndex)).r;
+        float3 viewNormal = LoadTex2D(Get(normalInput), NO_SAMPLER,  fullResPos, 0).xyz;
+        viewNormal.z = -viewNormal.z;
+
+        float3 viewPos = ComputeViewspacePosition(normalizedScreenPos , viewDepth);
+        
+        float radiusPixels = radiusToScreen / viewDepth;
+        float negInvR2 = NEG_INV_RADIUS_SQUARED;
+
+        if (Get(backgroundViewDepth) != -1.f)
+        {
+            float backgroundRadiusAO = (radiusToScreen / Get(backgroundViewDepth));
+            float scalFactor = max(1.0, backgroundRadiusAO / radiusPixels);
+            radiusPixels  *= scalFactor;
+            negInvR2  *= 1.0 / (scalFactor * scalFactor);
+        }
+
+        if (Get(foregroundViewDepth) != -1.f)
+        {
+            float foregroundRadiusAO = (radiusToScreen / Get(foregroundViewDepth));
+            float scalFactor = max(1.0, foregroundRadiusAO / radiusPixels);
+            radiusPixels *= scalFactor;
+            negInvR2 *= 1.0 / (scalFactor * scalFactor);
+        }
+       
+        const float aoScaleFactor = 1. / (1. - VIEW_COS_BIAS);
+        const float smallScaleAOFactor = SMALL_SCALE_AO_AMOUNT * aoScaleFactor * 2.0;
+        const float largeScaleAOFactor = LARGE_SCALE_AO_AMOUNT * aoScaleFactor;
+
+        float smallScaleAO = 0;
+        float largeScaleAO = 0;
+        float AO = 1.0;
+        if (radiusPixels > 1.0)
+        {
+            const float stepSizePixels = (radiusPixels / 4.0) / (NUM_STEPS + 1);
+            const float alpha = (2.0 * 3.14159265359) / NUM_DIRECTIONS;
+
+	        UNROLL
+            for (float DirectionIndex = 0; DirectionIndex < NUM_DIRECTIONS; ++DirectionIndex)
+            {
+                const float angle = alpha * DirectionIndex;
+
+                // Compute normalized 2D direction
+                #ifdef JITTER_SAMPLES
+                    float3 jitter = JITTER[uint(frac(sin(dot(float2(did.x, did.y), float2(12.9898, 78.233))) * 43758.5453)) % 32];
+                    const float2 direction = RotateDirection(float2(cos(angle), sin(angle)), jitter.xy);
+                    // Jitter starting sample within the first step
+                    float rayPixels = (jitter.z * stepSizePixels)  + 1.0;
+                #else
+                    const float2 direction = float2(cos(angle), sin(angle));
+                    float rayPixels = stepSizePixels  + 1.0;
+                #endif
+
+                AccumulateAO(smallScaleAO, rayPixels, sliceIndex, fullResPos, stepSizePixels, direction, viewPos, viewNormal, negInvR2);
+
+	            UNROLL
+                for (float StepIndex = 1; StepIndex < NUM_STEPS; ++StepIndex)
+                {
+                    AccumulateAO(largeScaleAO, rayPixels, sliceIndex, fullResPos, stepSizePixels, direction, viewPos, viewNormal, negInvR2);
+                }
+            }
+
+            AO = (smallScaleAO * smallScaleAOFactor ) + (largeScaleAO *  largeScaleAOFactor);
+            AO /= (NUM_DIRECTIONS * NUM_STEPS);
+        }
+        AO = saturate(1.0 - AO * 2.0);
+        Write3D(Get(aoQurter), uint3(did.xy, sliceIndex), AO);
+    }
+}

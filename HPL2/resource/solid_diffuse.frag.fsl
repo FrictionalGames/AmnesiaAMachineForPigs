@@ -1,0 +1,86 @@
+#define MATERIAL_SOLID 1
+#include "deferred_resources.h.fsl"
+#include "deferred_common.h.fsl"
+
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float3, pos, POSITION);
+    DATA(float2, uv, TEXCOORD0);
+    DATA(float3, normal, NORMAL);
+    DATA(float3, tangent, TANGENT);
+    DATA(float3, bitangent, BITANGENT);
+};
+
+STRUCT(PsOut)
+{
+    DATA(float4, diffuse, SV_Target0);
+    DATA(float4, normal, SV_Target1);
+    DATA(float4, position, SV_Target2);
+    DATA(float2, specular, SV_Target3);
+};
+
+PsOut PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    PsOut Out;
+    uint materialID = Get(uniformObjectBuffer)[Get(objectId)].materialID;
+
+    float2 texCoord = In.uv.xy;
+    float3 cameraEyeSpace = normalize(In.pos).xyz;
+
+#ifdef PARALLAX_ENABLED
+    if(HasHeight(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+        texCoord.xy += ParallaxAdvance(texCoord,
+            0.0,
+            32.0, 
+            Get(uniformMaterialBuffer)[materialID].heightMapScale * PARALAX_MULTIPLIER,
+            In.pos,
+            In.normal,
+            In.tangent,
+            In.bitangent,
+            IsHeightMapSingleChannel(Get(uniformMaterialBuffer)[materialID].materialConfig));
+    }
+#endif
+
+    float4 diffuseColor = SampleTex2D(Get(diffuseMap), Get(materialSampler), texCoord.xy);
+    if(diffuseColor.w < ALPHA_REJECT ) {
+        discard;
+    }
+
+    float3 normal = float3(0, 0, 0);
+    if(HasNormal(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+        float3 normalSample = SampleTex2D(Get(normalMap), Get(materialSampler), texCoord.xy).xyz - 0.5;
+        normal = normalize(normalSample.x * In.tangent + normalSample.y * In.bitangent + normalSample.z * In.normal);
+    } else {
+        normal = normalize(In.normal);
+    }
+
+    if(HasCubeMap(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+        float3 envUV = reflect(cameraEyeSpace, normal);
+        envUV = mul(Get(invViewRotationMat), float4(envUV.xyz, 1.0)).xyz;
+                    
+        float4 reflectionColor = SampleTexCube(Get(cubeMap), Get(materialSampler), envUV);
+        
+        float afEDotN = max(dot(-cameraEyeSpace, normal),0.0);
+        float fFresnel = Fresnel(afEDotN,
+            Get(uniformMaterialBuffer)[materialID].frenselBias, 
+            Get(uniformMaterialBuffer)[materialID].frenselPow);
+        
+        if(HasCubeMapAlpha(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+            reflectionColor *= SampleTex2D(Get(cubeMapAlpha), Get(materialSampler), texCoord.xy).wwww;
+        }
+        Out.diffuse = diffuseColor + reflectionColor * fFresnel;
+    } else {
+        Out.diffuse = diffuseColor;
+    }
+    Out.normal = float4(normal.xyz, 0.0);
+    Out.position = float4(In.pos.xyz, 1.0);
+    if(HasSpecular(Get(uniformMaterialBuffer)[materialID].materialConfig)) {
+        Out.specular = SampleTex2D(Get(specularMap), Get(materialSampler), texCoord.xy).xy;
+    } else {
+        Out.specular = float2(0,0);
+    }
+
+    RETURN(Out);
+}

@@ -1,0 +1,47 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+
+RES(RWTex2D(float), depthInput[16], UPDATE_FREQ_PER_FRAME, u1, binding = 6);
+
+PUSH_CONSTANT(uRootConstants, b0)
+{
+    DATA(uint2, screenDim, None);
+    DATA(uint, mipLevel, None);
+};
+
+
+NUM_THREADS(16, 16,  1)
+void CS_MAIN(SV_DispatchThreadID(uint3) did) 
+{    
+    INIT_MAIN;
+    uint2 screenSize = uint2(Get(screenDim) * exp2(-Get(mipLevel)).xx);
+    uint lastMip = Get(mipLevel) - 1;
+
+    if (did.x < screenSize.x && did.y < screenSize.y) {
+        float t1 = LoadRWTex2D(Get(depthInput)[lastMip], (did.xy * 2)).x;
+        float t2 = LoadRWTex2D(Get(depthInput)[lastMip], (did.xy * 2) + uint2(1,0)).x;
+        float t3 = LoadRWTex2D(Get(depthInput)[lastMip], (did.xy * 2) + uint2(0,1)).x;
+        float t4 = LoadRWTex2D(Get(depthInput)[lastMip], (did.xy * 2) + uint2(1,1)).x;
+        
+        float maxDepth = max(max(t1, t2), max(t3, t4));
+
+        // if we are reducing an odd-width texture then fetch the edge texels
+        if (((screenSize.x & 1) != 0) && (did.x == screenSize.x-3)) {
+            // if both edges are odd, fetch the top-left corner texel
+            if (((screenSize.y & 1) != 0) && (did.y == screenSize.y-3)) {
+                maxDepth = max(maxDepth, LoadRWTex2D(Get(depthInput)[lastMip], (did.xy * 2) + int2(2,2)).x);
+            }
+            maxDepth = max(maxDepth, LoadRWTex2D(Get(depthInput)[lastMip], (did.xy * 2) + int2(2,0)).x);        
+            maxDepth = max(maxDepth, LoadRWTex2D(Get(depthInput)[lastMip], (did.xy * 2) + int2(2,1)).x);
+        }
+        // if we are reducing an odd-height texture then fetch the edge texels
+        if (((screenSize.y & 1) != 0) && (did.y == screenSize.y-3)) {
+            maxDepth = max(maxDepth, LoadRWTex2D(Get(depthInput)[lastMip], (did.xy * 2) + int2(0,2)).x);      
+            maxDepth = max(maxDepth, LoadRWTex2D(Get(depthInput)[lastMip], (did.xy * 2) + int2(1,2)).x);
+        }
+
+        Write2D(Get(depthInput)[Get(mipLevel)], did.xy, maxDepth);
+    }
+    RETURN();
+}

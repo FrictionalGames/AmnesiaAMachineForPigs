@@ -1,0 +1,65 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+#include "deferred_fog.resource.h.fsl"
+
+STRUCT(PsIn)
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float4, pos, POSITION);
+    DATA(float3, ray, TEXCOORD0);
+	DATA(FLAT(uint), drawId, TEXCOORD1);
+};
+
+INLINE bool UseBackSide(uint _textureConfig)   { return (_textureConfig & (1 << 0)) != 0; }
+INLINE bool UseOutSideBox(uint _textureConfig)   { return (_textureConfig & (1 << 1)) != 0; }
+
+float GetPlaneIntersection(uint InstanceID, float3 ray, float3 avPlaneNormal, float afNegPlaneDist, float afFinalT)
+{
+    //Get T (amount of ray) to intersection
+    float fMul  = dot(ray, avPlaneNormal);
+    float fT = afNegPlaneDist / fMul;
+    
+    //Get the intersection and see if inside box
+    float3 vIntersection = abs(ray * fT + Get(uniformFogBuffer)[InstanceID].rayCastStart.xyz);
+
+    if(vIntersection.x < 0.5001 && vIntersection.y < 0.5001 && vIntersection.z < 0.5001)
+    {
+        return max(afFinalT, fT);	
+    }
+    return afFinalT;
+}
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    
+
+    float2 ndc = In.Position.xy * Get(viewTexel);
+    float fDepth = -SampleTex2D(Get(positionMap), Get(nearestSampler), ndc).z;
+
+    if(UseOutSideBox(Get(uniformFogBuffer)[In.drawId].flags)) {
+        fDepth = fDepth +  In.pos.z; //VertexPos is negative!
+        float fFinalT = 0.0;
+        if(UseBackSide(Get(uniformFogBuffer)[In.drawId].flags)) {
+            fFinalT = GetPlaneIntersection(In.drawId, In.ray, float3(-1.0, 0.0, 0.0), Get(uniformFogBuffer)[In.drawId].fogNegPlaneDistNeg.x, fFinalT);//Left
+            fFinalT = GetPlaneIntersection(In.drawId, In.ray, float3(1.0, 0.0, 0.0),  Get(uniformFogBuffer)[In.drawId].fogNegPlaneDistPos.x, fFinalT);//Right
+            fFinalT = GetPlaneIntersection(In.drawId, In.ray, float3(0.0, -1.0, 0.0), Get(uniformFogBuffer)[In.drawId].fogNegPlaneDistNeg.y, fFinalT);//Bottom
+            fFinalT = GetPlaneIntersection(In.drawId, In.ray, float3(0.0, 1.0, 0.0 ), Get(uniformFogBuffer)[In.drawId].fogNegPlaneDistPos.y, fFinalT);//Top
+            fFinalT = GetPlaneIntersection(In.drawId, In.ray, float3(0.0, 0.0, -1.0), Get(uniformFogBuffer)[In.drawId].fogNegPlaneDistNeg.z, fFinalT);//Back
+            fFinalT = GetPlaneIntersection(In.drawId, In.ray, float3(0.0, 0.0, 1.0),  Get(uniformFogBuffer)[In.drawId].fogNegPlaneDistPos.z, fFinalT);//Front
+            
+            float fLocalBackZ = (fFinalT * In.pos.z) -  In.pos.z;
+            fDepth = min(-fLocalBackZ, fDepth);
+        }
+    } else {
+        if(UseBackSide(Get(uniformFogBuffer)[In.drawId].flags)) {
+             fDepth = min(-In.pos.z, fDepth);
+        }
+    }
+
+    fDepth = min(fDepth - Get(uniformFogBuffer)[In.drawId].start, Get(uniformFogBuffer)[In.drawId].len);
+    float fAmount = max(fDepth / Get(uniformFogBuffer)[In.drawId].len,0.0);
+    
+    RETURN(float4(Get(uniformFogBuffer)[In.drawId].fogColor.rgb, pow(fAmount, Get(uniformFogBuffer)[In.drawId].falloffExp) * Get(uniformFogBuffer)[In.drawId].fogColor.w));
+}

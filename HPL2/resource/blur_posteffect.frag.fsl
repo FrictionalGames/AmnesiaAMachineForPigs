@@ -1,0 +1,41 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+RES(Tex2D(float4), sourceInput, UPDATE_FREQ_PER_FRAME, t0, binding = 1);
+RES(SamplerState, inputSampler, UPDATE_FREQ_NONE, s0, binding = 0);
+
+PUSH_CONSTANT(rootConstant, b0)
+{
+    DATA(float2, blurSize, None);
+};
+
+float4 PS_MAIN(PsIn In) 
+{    
+    INIT_MAIN;
+    uint2 screenSize = uint2(GetDimensions(Get(sourceInput), NO_SAMPLER));
+   
+    float mulSum = 0.25 + 0.3 + 0.5 + 0.3 + 0.25;
+    float vMul[9];
+    float fOffset[9];
+    vMul[0] = 0.25; vMul[1] = 0.3; vMul[2] = 0.5; vMul[3] = 0.3; vMul[4] = 0.25;
+    fOffset[0] = -2.5; fOffset[1] = -0.75; fOffset[2] = 0.0; fOffset[3] = 0.75; fOffset[4] = 2.5;
+
+    float3 amount = float3(0.0, 0.0, 0.0);
+
+    for(int i = 0; i < 5; i++)
+    {
+        float2 vOffset = (float2(fOffset[i], fOffset[i]) / float2(screenSize)) * Get(blurSize);
+        float3 vColor = SampleTex2D(Get(sourceInput), Get(inputSampler), In.uv.xy + vOffset).xyz;
+        amount += vColor * vMul[i];
+    }
+    amount /= mulSum;
+
+    RETURN(float4(amount, 1.0));
+}
+

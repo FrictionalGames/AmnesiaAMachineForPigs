@@ -1,0 +1,125 @@
+
+RES(Tex2D(float), depthTest, UPDATE_FREQ_PER_FRAME, t0, binding = 0);
+RES(SamplerState, depthSampler, UPDATE_FREQ_NONE, s0, binding = 1);
+
+RES(RWBuffer(bool), occlusionTest, UPDATE_FREQ_PER_FRAME, u0, binding = 2);
+RES(Buffer(float4), occlusionBoxBuffer, UPDATE_FREQ_PER_FRAME, t1, binding = 3);
+
+CBUFFER(objectUniformBlock, UPDATE_FREQ_PER_FRAME, b0, binding = 5)
+{ 
+    DATA(uint2, depthDim, None);
+    DATA(uint, numObjects, None);
+    DATA(int, maxMipLevel, None);
+};
+
+CBUFFER(perFrameConstants, UPDATE_FREQ_PER_FRAME, b1, binding = 6)
+{
+    DATA(float4x4, invViewRotationMat, None);
+    DATA(float4x4, viewMat, None);
+    DATA(float4x4, invViewMat, None);
+    DATA(float4x4, projMat, None);
+    DATA(float4x4, viewProjMat, None);
+
+    DATA(float, worldFogStart, None);
+    DATA(float, worldFogLength, None);
+    DATA(float, oneMinusFogAlpha, None);
+    DATA(float, fogFalloffExp, None);
+    DATA(float4, worldFogColor, None);
+
+    DATA(float2, viewTexel, None);
+    DATA(float2, viewportSize, None);
+};
+
+
+NUM_THREADS(128, 1,  1)
+void CS_MAIN(SV_DispatchThreadID(uint3) did)
+{
+    INIT_MAIN;
+
+    if(did.x >= Get(numObjects))
+    {
+        return;
+    }
+    float3 bboxMin = Get(occlusionBoxBuffer)[(2 * did.x)].xyz;
+    float3 bboxMax = Get(occlusionBoxBuffer)[(2 * did.x) + 1].xyz;
+
+    //Adapted from http://blog.selfshadow.com/publications/practical-visibility/
+    float3 boxCorners[] = {
+        float3(bboxMax.x,bboxMax.y,bboxMax.z),
+		float3(bboxMax.x,bboxMax.y,bboxMin.z),
+		float3(bboxMax.x,bboxMin.y,bboxMax.z),
+		float3(bboxMax.x,bboxMin.y,bboxMin.z),
+		float3(bboxMin.x,bboxMax.y,bboxMax.z),
+		float3(bboxMin.x,bboxMax.y,bboxMin.z),
+		float3(bboxMin.x,bboxMin.y,bboxMax.z),
+		float3(bboxMin.x,bboxMin.y,bboxMin.z)
+    };
+
+    float minZ = 1.0;
+    float2 minXY = float2(1.0, 1.0);
+    float2 maxXY = float2(0.0, 0.0);
+    UNROLL
+    for (uint k = 0; k < 8; k++)
+    {
+        //transform World space aaBox to NDC
+        float4 clipPos = mul(Get(viewProjMat), float4(boxCorners[k].xyz, 1.0));
+	    if(clipPos.z > clipPos.w 
+            || clipPos.x < -clipPos.w 
+            || clipPos.x > clipPos.w 
+            || clipPos.y < -clipPos.w 
+            || clipPos.y > clipPos.w) {
+            Get(occlusionTest)[did.x] = true;  
+            return;
+        }
+
+		clipPos.xyz = clipPos.xyz / clipPos.w;
+      	clipPos.z = max(clipPos.z, 0);
+
+		clipPos.xy = clamp(clipPos.xy, -1, 1);
+		clipPos.xy = (clipPos.xy * float2(0.5, -0.5)) + float2(0.5, 0.5);	
+        
+        minXY = min(clipPos.xy, minXY);
+        maxXY = max(clipPos.xy, maxXY);
+        minZ = saturate(min(minZ, clipPos.z));
+    }
+    if(distance(minXY, maxXY) >= .4 || distance(minXY, maxXY) >= .4) {
+        Get(occlusionTest)[did.x] = true;  
+        return;
+    }
+
+    int2 rtSize = int2(Get(viewportSize).xy);
+    int2 size = int2((maxXY - minXY) * rtSize);
+    float mip = floor(log2(max(size.x, size.y)));
+
+    mip = clamp(mip, 0, Get(maxMipLevel));
+    
+    // Texel footprint for the lower (finer-grained) level
+    float level_lower = max(mip - 1, 0);
+    float2 scale = exp2(-level_lower).xx;
+    float2 a = floor(minXY.xy * scale);
+    float2 b = ceil(maxXY.xy * scale);
+    float2 dims = b - a;
+    
+    // Use the lower level if we only touch <= 2 texels in both dimensions
+    if (dims.x <= 2.0 && dims.y <= 2.0)  {
+        mip = level_lower;
+    }
+   
+    const uint2 maxSamples = uint2(16, 16);
+    const float2 XYSize = (maxXY - minXY);
+    const float2 steps =  XYSize / float2(maxSamples); 
+    
+    float maxDepth = 0.0;
+    float yPos = minXY.y;
+    UNROLL
+    for(uint i = 0; i < maxSamples.y; i++) {
+        float xPos = minXY.x;
+        UNROLL
+        for(uint j = 0; j < maxSamples.x; j++) {
+            maxDepth = max(maxDepth, SampleLvlTex2D(Get(depthTest), Get(depthSampler), float2(xPos, yPos), mip).r);
+            xPos += steps.x;
+        }
+        yPos += steps.y;
+    }
+    Get(occlusionTest)[did.x] = minZ <= (maxDepth + 0.00015); 
+}

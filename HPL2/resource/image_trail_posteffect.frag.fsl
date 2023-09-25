@@ -1,0 +1,21 @@
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+PUSH_CONSTANT(rootConstant, b0)
+{
+    DATA(float, alpha, None);
+};
+
+RES(SamplerState, inputSampler, UPDATE_FREQ_NONE, s0, binding = 0);
+RES(Tex2D(float4), sourceInput, UPDATE_FREQ_PER_FRAME, t0, binding = 1);
+
+float4 PS_MAIN(PsIn In) 
+{    
+    INIT_MAIN;
+    float3 color = SampleTex2D(Get(sourceInput), Get(inputSampler), In.uv).rgb;
+    RETURN(float4(color, Get(alpha)));
+}
+

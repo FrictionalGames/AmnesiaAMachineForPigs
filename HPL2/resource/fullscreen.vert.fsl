@@ -1,0 +1,16 @@
+
+STRUCT(VSOutput)
+{
+	DATA(float4, Position, SV_Position);
+	DATA(float2, uv, TEXCOORD0);
+};
+
+
+VSOutput VS_MAIN(SV_VertexID(uint) VertexID)
+{
+	INIT_MAIN;
+	VSOutput Out;
+	Out.uv = float2((VertexID << 1) & 2, VertexID & 2);
+	Out.Position = float4(Out.uv * float2(2, -2) + float2(-1, 1), 0, 1);
+	RETURN(Out);
+}

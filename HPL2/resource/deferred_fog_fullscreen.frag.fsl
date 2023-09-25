@@ -1,0 +1,20 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+#include "deferred_fog.resource.h.fsl"
+
+STRUCT(PsIn)
+{
+	DATA(float4, Position, SV_Position);
+	DATA(float2, uv, TEXCOORD0);
+};
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    float fDepth = -SampleTex2D(Get(positionMap), Get(nearestSampler), In.uv.xy).z;
+    
+    fDepth = min(fDepth - Get(fogStart), Get(fogLength));
+    float fAmount = max(fDepth / Get(fogLength), 0.0);
+    RETURN(float4(Get(color).rgb, pow(fAmount, Get(falloffExp)) * Get(color).w));
+}

@@ -1,0 +1,81 @@
+// This code contains NVIDIA Confidential Information and is disclosed to you
+// under a form of NVIDIA software license agreement provided separately to you.
+//
+// Notice
+// NVIDIA Corporation and its licensors retain all intellectual property and
+// proprietary rights in and to this software and related documentation and
+// any modifications thereto. Any use, reproduction, disclosure, or
+// distribution of this software and related documentation without an express
+// license agreement from NVIDIA Corporation is strictly prohibited.
+//
+// ALL NVIDIA DESIGN SPECIFICATIONS, CODE ARE PROVIDED "AS IS.". NVIDIA MAKES
+// NO WARRANTIES, EXPRESSED, IMPLIED, STATUTORY, OR OTHERWISE WITH RESPECT TO
+// THE MATERIALS, AND EXPRESSLY DISCLAIMS ALL IMPLIED WARRANTIES OF NONINFRINGEMENT,
+// MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE.
+//
+// Information and code furnished is believed to be accurate and reliable.
+// However, NVIDIA Corporation assumes no responsibility for the consequences of use of such
+// information or for any infringement of patents or other rights of third parties that may
+// result from its use. No license is granted by implication or otherwise under any patent
+// or patent rights of NVIDIA Corporation. Details are subject to change without notice.
+// This code supersedes and replaces all information previously supplied.
+// NVIDIA Corporation products are not authorized for use as critical
+// components in life support devices or systems without express written approval of
+// NVIDIA Corporation.
+//
+// Copyright (c) 2008-2021 NVIDIA Corporation. All rights reserved.
+
+// Copyright 2023 Michael Pollind
+// SPDX-License-Identifier: Apache-2.0
+
+RES(Tex2D(float), depthInput, UPDATE_FREQ_PER_FRAME, t0, binding = 0);
+RES(Tex2D(float4), normalInput, UPDATE_FREQ_PER_FRAME, t1, binding = 1);
+RES(RWTex2D(float4), gOutput, UPDATE_FREQ_PER_FRAME, u0, binding = 2);
+
+RES(RWTex2DArray(float), prepareDepths, UPDATE_FREQ_NONE, u1, binding = 3);
+RES(RWTex2DArray(float), aoQurter, UPDATE_FREQ_NONE, u2, binding = 4);
+
+RES(SamplerState, pointSampler, UPDATE_FREQ_NONE, s0, binding = 5);
+
+#define RADIUS_SQUARED (RADIUS * RADIUS)
+#define NEG_INV_RADIUS_SQUARED (-1.0 / RADIUS_SQUARED)
+
+
+CBUFFER(constUniformBuffer, UPDATE_FREQ_NONE , b1, binding = 6) { 
+    DATA(float2, NDCToViewMul, None);
+    DATA(float2, NDCToViewAdd, None);
+   
+    DATA(float, tanHalfFOV, None);
+    DATA(float, zFar, None);
+    DATA(float, zNear, None);
+    DATA(float, outputExp, None);
+    
+    DATA(uint2, viewportDim, None);
+    DATA(float2, viewportTexel, None);
+   
+    DATA(uint2, quarterViewportDim, None);
+    DATA(float2, quarterViewportTexel, None);
+
+    DATA(float, backgroundViewDepth, None);
+    DATA(float, foregroundViewDepth, None);
+};
+
+
+float3 ComputeViewspacePosition(float2 screenPos, float viewspaceDepth) {
+    float3 ret;
+    ret.xy = (Get(NDCToViewMul) * screenPos.xy + Get(NDCToViewAdd)) * float2(viewspaceDepth, viewspaceDepth);
+    ret.z = viewspaceDepth;
+    return ret;
+}
+
+float ScreenSpaceToViewSpaceDepth( const float screenDepth)
+{
+    float near = Get(zNear);
+    float far = Get(zFar);
+    float z_n = 2.0 * screenDepth - 1.0;
+    return 2.0 * near * far / (far + near - z_n * (far - near)); // -near / (far - screenDepth * (far - near)) * far;
+}
+
+
+
+

@@ -1,0 +1,59 @@
+/**
+* Copyright 2023 Michael Pollind
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*     http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+#define MATERIAL_TRANSLUCENT 1
+#include "deferred_resources.h.fsl"
+#include "deferred_common.h.fsl"
+
+STRUCT(VSInput)
+{
+	DATA(float3, Position, POSITION);
+	DATA(float2, TexCoord, TEXCOORD0);
+	DATA(float3, Normal, NORMAL);
+	DATA(float3, Tangent, TANGENT);
+	DATA(float4, Color, COLOR);
+};
+
+STRUCT(VSOutput)
+{
+	DATA(float4, Position, SV_Position);
+    DATA(float3, pos, POSITION);
+	DATA(float2, uv, TEXCOORD0);
+	DATA(float3, normal, NORMAL);
+	DATA(float3, tangent, TANGENT);
+	DATA(float3, bitangent, BITANGENT);
+	DATA(float4, color, COLOR);
+};
+
+VSOutput VS_MAIN( VSInput In)
+{
+    INIT_MAIN;
+    VSOutput Out;
+
+    float4x4 modelView = mul(Get(viewMat), Get(uniformObjectBuffer)[Get(objectId)].modelMat);
+    float4x4 modelViewPrj = mul(Get(projMat), modelView);
+
+    Out.pos = mul(modelView, float4(In.Position.xyz, 1.0)).xyz;
+    Out.uv = mul(Get(uniformObjectBuffer)[Get(objectId)].uvMat, float4(In.TexCoord, 0, 1.0)).xy;
+
+    float3x3 normalMat = ToNormalMat(Get(uniformObjectBuffer)[Get(objectId)].invModelMat, Get(invViewMat));
+    Out.normal = normalize(mul(normalMat, In.Normal.xyz));
+    Out.tangent = normalize(mul(normalMat, In.Tangent.xyz));
+    Out.bitangent = normalize(mul(normalMat, cross(In.Tangent.xyz, In.Normal.xyz)));
+    Out.color = In.Color;
+
+    Out.Position = mul(modelViewPrj, float4(In.Position.xyz, 1.0));
+    RETURN(Out);
+}

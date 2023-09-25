@@ -1,0 +1,67 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+#define MATERIAL_TRANSLUCENT 1
+#include "deferred_resources.h.fsl"
+#include "deferred_common.h.fsl"
+
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float3, pos, POSITION);
+    DATA(float2, uv, TEXCOORD0);
+    DATA(float4, color, COLOR);
+    
+};
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    uint blendMode = BlendModeTrans(Get(options)); 
+
+    uint materialID = Get(uniformObjectBuffer)[Get(objectId)].materialID;
+    float4 finalColor = float4(0.0, 0.0 ,0.0, 1.0);
+    uint textureConfig = Get(uniformMaterialBuffer)[materialID].materialConfig;
+
+    if(HasDiffuse(textureConfig)) {
+        finalColor = SampleTex2D(Get(diffuseMap), Get(materialSampler), In.uv) * In.color;
+    }
+
+    float finalAlpha = Get(sceneAlpha);
+    if (UseFog(Get(options))) {
+        float fFogAmount =  pow(
+            clamp((-In.pos.z - Get(worldFogStart)) / Get(worldFogLength), 0.0, 1.0), Get(fogFalloffExp));
+        finalAlpha = (Get(oneMinusFogAlpha) * fFogAmount + (1.0 - fFogAmount)) * Get(sceneAlpha);
+    }
+
+    switch(blendMode) {
+        case BLEND_MODE_ADD: {
+            finalColor.xyz *= finalAlpha*Get(lightLevel);
+            break;
+        }
+        case BLEND_MODE_MUL: {
+            finalColor.xyz += (float3(1.0,1.0, 1.0) - finalColor.xyz) * (1.0-finalAlpha);
+            break;
+        }
+        case BLEND_MODE_MULX2: {
+            float fBlendMulAlpha = Get(lightLevel) * finalAlpha;
+            finalColor.xyz = mul(finalColor.xyz, fBlendMulAlpha) + mul(float3(0.5,0.5,0.5), (1.0 - fBlendMulAlpha));
+            break;
+        }
+        case BLEND_MODE_ALPHA: {
+            finalColor.xyz *= Get(lightLevel);
+            finalColor.a *= finalAlpha;
+            break;
+        }
+        case BLEND_MODE_PREMUL_ALPHA: {
+           finalColor *= finalAlpha;
+           finalColor.xyz *= Get(lightLevel);
+           break;
+        }
+    }
+
+    if(finalColor.a == 0.0) {
+        discard;
+    }
+    RETURN(finalColor);
+}

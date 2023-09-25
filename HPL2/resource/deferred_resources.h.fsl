@@ -1,0 +1,140 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+
+#define PARALAX_MULTIPLIER 0.7
+
+#define BLEND_MODE_ADD 0
+#define BLEND_MODE_MUL 1
+#define BLEND_MODE_MULX2 2
+#define BLEND_MODE_ALPHA 3
+#define BLEND_MODE_PREMUL_ALPHA 4
+
+CBUFFER(perFrameConstants, UPDATE_FREQ_PER_FRAME, b0, binding = 0)
+{
+    DATA(float4x4, invViewRotationMat, None);
+    DATA(float4x4, viewMat, None);
+    DATA(float4x4, invViewMat, None);
+    DATA(float4x4, projMat, None);
+    DATA(float4x4, viewProjMat, None);
+
+    DATA(float, worldFogStart, None);
+    DATA(float, worldFogLength, None);
+    DATA(float, oneMinusFogAlpha, None);
+    DATA(float, fogFalloffExp, None);
+    DATA(float4, worldFogColor, None);
+
+    DATA(float2, viewTexel, None);
+    DATA(float2, viewportSize, None);
+};
+
+STRUCT(UniformObject) 
+{
+    DATA(float, dissolveAmount, None);
+    DATA(uint, materialID, None);
+    DATA(uint, __pad0, None);
+    DATA(uint, __pad1, None);
+    DATA(float4x4, modelMat, None);
+    DATA(float4x4, invModelMat, None);
+    DATA(float4x4, uvMat, None);
+};
+
+#if defined(MATERIAL_SOLID)
+    // material data
+    STRUCT(UniformMaterial) {
+        DATA(uint, materialConfig, None);
+        DATA(float, heightMapScale, None);
+        DATA(float, heightMapBias, None);
+        DATA(float, frenselBias, None);
+
+        DATA(float, frenselPow, None);
+	    DATA(uint, _pad0, None);
+	    DATA(uint, _pad1, None);
+	    DATA(uint, _pad2, None);
+	    
+	    DATA(uint, _pad3[4], None);
+    };
+#elif defined(MATERIAL_TRANSLUCENT)
+    STRUCT(UniformMaterial) {
+        DATA(uint, materialConfig, None);
+        DATA(float, refractionScale, None);
+        DATA(float, frenselBias, None);
+        DATA(float, frenselPos, None);
+
+        DATA(float, rimMulLight, None);
+        DATA(float, rimMulPower, None);
+	    DATA(uint, _pad0, None);
+	    DATA(uint, _pad1, None);
+	    
+	    DATA(float4, _pad2, None);
+    };
+#elif defined(MATERIAL_WATER)
+    STRUCT(UniformMaterial) {
+        DATA(uint, materialConfig, None);
+        DATA(float, refractionScale, None);
+        DATA(float, frenselBias, None);
+        DATA(float, frenselPow, None);
+
+        DATA(float, reflectionFadeStart, None);
+        DATA(float, reflectionFadeEnd, None);
+        DATA(float, waveSpeed, None);
+        DATA(float, waveAmplitude, None);
+        
+        DATA(float, waveFreq, None);
+	    DATA(uint, _pad0, None);
+	    DATA(uint, _pad1, None);
+	    DATA(uint, _pad2, None);
+    };
+
+#else
+    STRUCT(UniformMaterial) {
+        DATA(uint, materialConfig, None); 
+        DATA(uint, _pad0[8], None);
+    };
+#endif
+    
+RES(Tex2D(float4), diffuseMap, UPDATE_FREQ_PER_BATCH, t2, binding = 1); 
+RES(Tex2D(float4), normalMap, UPDATE_FREQ_PER_BATCH, t3, binding = 2);
+RES(Tex2D(float4), specularMap, UPDATE_FREQ_PER_BATCH, t4, binding = 3);
+RES(Tex2D(float4), alphaMap, UPDATE_FREQ_PER_BATCH, t5, binding = 4);
+RES(Tex2D(float4), heightMap, UPDATE_FREQ_PER_BATCH, t6, binding =  5);
+RES(Tex2D(float4), illuminationMap, UPDATE_FREQ_PER_BATCH, t7, binding = 6);
+RES(TexCube(float4), cubeMap, UPDATE_FREQ_PER_BATCH, t8, binding = 7);
+RES(Tex2D(float4), dissolveAlphaMap, UPDATE_FREQ_PER_BATCH, t9, binding = 8);
+RES(Tex2D(float4), cubeMapAlpha, UPDATE_FREQ_PER_BATCH, t10, binding = 9);
+
+RES(SamplerState, refractionSampler, UPDATE_FREQ_NONE, s1, binding = 10);
+RES(SamplerState, dissolveSampler, UPDATE_FREQ_NONE, s2, binding = 11);
+RES(SamplerState, nearestSampler, UPDATE_FREQ_NONE, s3, binding = 12);
+RES(SamplerState, materialSampler, UPDATE_FREQ_NONE, s4, binding = 13); 
+
+RES(Tex2D(float4), dissolveMap, UPDATE_FREQ_NONE, t11, binding = 14);
+
+RES(Buffer(UniformMaterial), uniformMaterialBuffer, UPDATE_FREQ_PER_FRAME, t0, binding = 15);
+RES(Buffer(UniformObject), uniformObjectBuffer, UPDATE_FREQ_PER_FRAME, t1, binding = 16);
+RES(Tex2D(float4), refractionMap, UPDATE_FREQ_PER_FRAME, t12, binding = 17); 
+RES(Tex2D(float4), reflectionMap[4], UPDATE_FREQ_PER_FRAME, t13, binding = 18); 
+
+PUSH_CONSTANT(materialRootConstant, b0)
+{
+    DATA(uint, objectId, None);
+    DATA(uint,  options,   None);
+    DATA(float, afT, None);
+    DATA(float, sceneAlpha, None);
+    DATA(float, lightLevel, None);
+};
+
+// translucency 
+INLINE uint BlendModeTrans(uint _options) { return  (_options & 0xf); } 
+INLINE uint ReflectionBuffer(uint _options) { return (_options >> 4) & 0x7; }
+INLINE bool UseIlluminationTrans(uint _options) { return (_options & (1 << 7)) != 0;}
+INLINE bool UseReflectionTrans(uint _options)   { return (_options & (1 << 8)) != 0; }
+INLINE bool UseRefractionTrans(uint _options)   { return (_options & (1 << 9)) != 0; }
+INLINE bool UseFog(uint _options) { return (_options & (1 << 10)) != 0;}
+
+INLINE float3x3 ToNormalMat(float4x4 invModel, float4x4 invView) {
+    return transpose(mul(float3x3(invModel[0].xyz, invModel[1].xyz, invModel[2].xyz), float3x3(invView[0].xyz, invView[1].xyz, invView[2].xyz)));
+}
+
+#include "material_resource.h.fsl"
+

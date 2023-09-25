@@ -1,0 +1,48 @@
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+RES(SamplerState, inputSampler, UPDATE_FREQ_NONE, s0, binding = 0);
+RES(Tex2D(float4), sourceInput, UPDATE_FREQ_PER_FRAME, t0, binding = 1);
+
+PUSH_CONSTANT(rootConstant, b0)
+{
+    DATA(float, size, None);
+    DATA(float, blurStartDist, None);
+    DATA(float2, screenDim, None);
+};
+
+INLINE float3 SampleTextureBlur(float2 viewTexel, float2 screenCoord, float2 dir, float sizeMul, float colorMul) {
+    float2 pos = (screenCoord + (dir * sizeMul)) * viewTexel;
+    float3 color = SampleTex2D(Get(sourceInput), Get(inputSampler), pos).xyz;
+    return color * colorMul;
+
+}
+
+float4 PS_MAIN(PsIn In) 
+{    
+    INIT_MAIN;
+	
+    float2 viewTexel = 1.0 / Get(screenDim); 
+    float2 halfScreenSize = Get(screenDim) / 2.0;
+    float2 screenCoord = In.uv * Get(screenDim);
+
+    float2 vDir = halfScreenSize - screenCoord;
+    float fDist = length(vDir) / halfScreenSize.x;
+    vDir = normalize(vDir);
+    fDist = max(0.0, fDist - Get(blurStartDist));
+    
+    vDir *= fDist * Get(size) * Get(screenDim).x;
+    float3 vDiffuseColor = float3(0.0, 0.0, 0.0);
+   
+    vDiffuseColor += SampleTextureBlur(viewTexel, screenCoord, vDir, -1.0, 0.1);
+    vDiffuseColor += SampleTextureBlur(viewTexel, screenCoord, vDir, -0.5, 0.2);
+    vDiffuseColor += SampleTextureBlur(viewTexel, screenCoord, vDir, 0.0, 0.5);
+    vDiffuseColor += SampleTextureBlur(viewTexel, screenCoord, vDir, 0.5, 0.2);
+    vDiffuseColor += SampleTextureBlur(viewTexel, screenCoord, vDir, 1.0, 0.1);
+    vDiffuseColor /= 1.1;
+    RETURN(float4(vDiffuseColor, 1.0));
+}
+

@@ -1,0 +1,29 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+PUSH_CONSTANT(rootConstant, b0)
+{
+    DATA(float, alphaFade, None);
+};
+
+RES(SamplerState, inputSampler, UPDATE_FREQ_NONE, s0, binding = 0);
+RES(Tex2D(float4), sourceInput, UPDATE_FREQ_PER_FRAME, t0, binding = 1);
+RES(Tex1D(float4), colorConv, UPDATE_FREQ_PER_FRAME, t1, binding = 2);
+
+float4 PS_MAIN(PsIn In) 
+{    
+    INIT_MAIN;
+    
+    float3 diffuseColor = SampleTex2D(Get(sourceInput), Get(inputSampler), In.uv).xyz;
+    float3 outputColor =  float3(SampleTex1D(Get(colorConv), Get(inputSampler), diffuseColor.x).x,
+                    SampleTex1D(Get(colorConv), Get(inputSampler), diffuseColor.y).y,
+                    SampleTex1D(Get(colorConv), Get(inputSampler), diffuseColor.z).z);
+    RETURN(float4((outputColor * Get(alphaFade)) + (diffuseColor * (1.0 - Get(alphaFade))), 1.0));
+}
+

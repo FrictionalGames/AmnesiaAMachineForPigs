@@ -1,0 +1,24 @@
+#define MATERIAL_SOLID 1
+#include "deferred_resources.h.fsl"
+#include "deferred_common.h.fsl"
+
+
+STRUCT(PsIn) 
+{
+	DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+
+STRUCT(PsOut)
+{
+	DATA(float4, diffuse, SV_Target0);
+};
+
+PsOut PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    PsOut Out;
+    Out.diffuse = SampleTex2D(Get(illuminationMap), Get(materialSampler), In.uv).rgba * Get(afT);
+    RETURN(Out);
+}

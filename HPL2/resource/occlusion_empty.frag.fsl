@@ -1,0 +1,11 @@
+
+STRUCT(PsIn)
+{
+    DATA(float4, Position, SV_Position);
+};
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    RETURN(float4(0.0, 0.0, 0.0, 0.0));
+}

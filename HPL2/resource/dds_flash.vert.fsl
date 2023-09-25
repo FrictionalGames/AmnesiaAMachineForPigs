@@ -1,0 +1,34 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+STRUCT(VSInput)
+{
+    DATA(float3, Position, POSITION);
+    DATA(float3, Normal, NORMAL);
+    DATA(float2, TexCoord, TEXCOORD0);
+};
+
+STRUCT(VSOutput)
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+    DATA(float3, normal, NORMAL);
+};
+
+CBUFFER(uniformBlock, UPDATE_FREQ_PER_FRAME, b0, binding = 0) {
+    DATA(float4, colorMul, None);
+    DATA(float4x4, mvp, None);
+    DATA(float3x3, normalMat, None);
+};
+
+VSOutput VS_MAIN( VSInput In )
+{
+    INIT_MAIN;
+    VSOutput Out;
+    Out.uv = In.TexCoord;
+    Out.normal = normalize(mul(Get(normalMat), In.Normal));
+    Out.Position = mul(Get(mvp), float4(In.Position.xyz, 1.0));
+    Out.Position.z -= .0001;
+    RETURN(Out);
+}
+

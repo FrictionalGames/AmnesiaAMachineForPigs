@@ -1,0 +1,32 @@
+#include "material_resource.h.fsl"
+
+CBUFFER(uniformBlock, UPDATE_FREQ_PER_FRAME, b0, binding = 0) {
+    DATA(float4x4, mvp, None);
+    DATA(int, feature, None);
+};
+
+STRUCT(PsIn)
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+RES(Tex2D(float4), diffuseMap, UPDATE_FREQ_PER_FRAME, t0, binding = 1); 
+RES(SamplerState, diffuseSampler, UPDATE_FREQ_NONE, s0, binding = 2);
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+    float alpha = 1.0;
+    if(HasAlpha(Get(feature))) {
+        if(IsAlphaSingleChannel(Get(feature))) {
+            alpha = SampleTex2D(Get(diffuseMap), Get(diffuseSampler), In.uv).r;
+        } else {
+            alpha = SampleTex2D(Get(diffuseMap), Get(diffuseSampler), In.uv).w;
+        }
+    }
+    if(alpha < ALPHA_REJECT) {
+        discard;
+    }
+    RETURN(float4(1.0, 1.0, 1.0, 1.0));
+}

@@ -1,0 +1,107 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+
+#define SPOT_LIGHT 1
+#include "deferred_light_resource.h.fsl"
+
+STRUCT(PsIn)
+{
+    DATA(float4, Position, SV_Position);
+};
+
+
+float4 PS_MAIN(PsIn In)
+{
+    INIT_MAIN;
+
+    float4 color =  LoadTex2D(Get(diffuseMap), Get(pointSampler), uint2(In.Position.xy), 0);
+    float3 normal = LoadTex2D(Get(normalMap), Get(pointSampler), uint2(In.Position.xy), 0).xyz;
+    float3 position =  LoadTex2D(Get(positionMap), Get(pointSampler), uint2(In.Position.xy), 0).xyz;
+    float2 specular =  LoadTex2D(Get(specularMap), Get(pointSampler), uint2(In.Position.xy), 0).xy;
+
+    float3 lightDir = (Get(lightObjectBuffer)[Get(lightId)].lightPos.xyz -  position) * (1.0 / Get(lightObjectBuffer)[Get(lightId)].lightRadius);
+    float attenuation = SampleTex1D(Get(attenuationLightMap), Get(nearestSampler), dot(lightDir, lightDir)).x;
+    
+    float3 normalLightDir = normalize(lightDir);
+    float3 normalizedNormal = normalize(normal.xyz);
+
+    float4 projectionUV = mul(Get(lightObjectBuffer)[Get(lightId)].spotViewProj, float4(position, 1.0));
+    projectionUV.xyz = (projectionUV.xyz / projectionUV.w);
+    projectionUV.xy = projectionUV.xy * 0.5 + 0.5;
+    projectionUV.w = 1.0;
+
+
+    float3 goboVal = float3(1.0, 1.0, 1.0);
+    if(HasGoboMap(Get(lightObjectBuffer)[Get(lightId)].config)) {
+        goboVal = SampleTex2DProj(Get(goboMap), Get(goboSampler), projectionUV).xyz;
+    } else {
+        float fOneMinusCos = 1.0 - dot( normalLightDir,  Get(lightObjectBuffer)[Get(lightId)].lightForward);
+        attenuation *= SampleTex1D(Get(falloffMap), Get(nearestSampler), fOneMinusCos / Get(lightObjectBuffer)[Get(lightId)].oneMinusCosHalfSpotFov).x;
+    }
+
+    /////////////////////////////////
+	//Calculate diffuse color
+    float fLDotN = max(dot(normalizedNormal, normalLightDir), 0.0);
+    float3 diffuseColor = color.xyz * Get(lightObjectBuffer)[Get(lightId)].lightColor.xyz * fLDotN;
+    float t = 0;
+    if(HasShadowMap(Get(lightObjectBuffer)[Get(lightId)].config)) {
+	const float depthBias = 0.0005;
+        
+        #ifdef SHADOW_JITTER_SIZE
+            float2 shadowTexelSize = 1.0/ GetDimensions(Get(shadowMap), NO_SAMPLER).xy;
+
+            float fShadowSum = 0.0;
+            float fJitterZ = 0.0;
+            float2 vScreenJitterCoord = In.Position.xy * (1.0 / float(SHADOW_JITTER_SIZE));
+            vScreenJitterCoord.y = frac(vScreenJitterCoord.y);	 //Make sure the coord is in 0 - 1 range
+            vScreenJitterCoord.y *= 1.0 / (float(SHADOW_JITTER_SAMPLES)/2.0);	 //Access only first texture piece
+            
+            for(int i=0; i < 2; i++)
+            {
+                float2 vJitterLookupCoord = float2(vScreenJitterCoord.x, vScreenJitterCoord.y + fJitterZ);
+                float4 vOffset = SampleTex2D(Get(shadowOffsetMap), Get(nearestSampler), vJitterLookupCoord) * 2.0 - 1.0;
+                fShadowSum += CompareTex2DProj(Get(shadowMap), Get(shadowCmpSampler), float4(projectionUV.xy + (float2(vOffset.xy) * shadowTexelSize), projectionUV.z  - depthBias , projectionUV.w)) / 4.0;
+                fShadowSum += CompareTex2DProj(Get(shadowMap), Get(shadowCmpSampler), float4(projectionUV.xy + (float2(vOffset.zw) * shadowTexelSize), projectionUV.z  - depthBias , projectionUV.w)) / 4.0;
+                            
+                fJitterZ += 1.0 /  (float(SHADOW_JITTER_SAMPLES)/2.0);
+            }
+            
+            ////////////////
+            // Check if in penumbra
+            if( (fShadowSum-1.0) * fShadowSum * fLDotN != 0.0)
+            {
+                //Multiply, so the X presamples only affect their part (X/all_samples) of samples taken.
+                fShadowSum *= 4.0 / float(SHADOW_JITTER_SAMPLES); 
+                            
+                ////////////////
+                // Fullscale filtering
+                for(int i=0; i< (SHADOW_JITTER_SAMPLES/2)-2; i++)
+                {
+                    float2 vJitterLookupCoord = float2(vScreenJitterCoord.x, vScreenJitterCoord.y + fJitterZ); //Not that coords are 0-1!
+                
+                    float4 vOffset = SampleTex2D(Get(shadowOffsetMap), Get(nearestSampler), vJitterLookupCoord) * 2.0 - 1.0;
+                    fShadowSum += CompareTex2DProj(Get(shadowMap), Get(shadowCmpSampler), float4(projectionUV.xy + (float2(vOffset.xy) * shadowTexelSize), projectionUV.z  - depthBias, projectionUV.w)) / float(SHADOW_JITTER_SAMPLES);
+                    fShadowSum += CompareTex2DProj(Get(shadowMap), Get(shadowCmpSampler), float4(projectionUV.xy + (float2(vOffset.zw) * shadowTexelSize), projectionUV.z  - depthBias, projectionUV.w)) / float(SHADOW_JITTER_SAMPLES);
+                    
+                    fJitterZ += 1.0 /  (float(SHADOW_JITTER_SAMPLES)/2.0);
+                }
+                
+            }
+            attenuation *= fShadowSum;
+        #else
+            attenuation *= CompareTex2DProj(Get(shadowMap), Get(shadowCmpSampler), float4(projectionUV.xy, projectionUV.z - depthBias, projectionUV.w));
+        #endif
+    }
+    
+    float3 specularColor = float3(0.0, 0.0, 0.0);
+    if(Get(lightObjectBuffer)[Get(lightId)].lightColor.w > 0.0) {
+        float3 halfVec = normalize(normalLightDir + normalize(-position));
+        float specIntensity = specular.x;
+        float specPower = exp2(specular.y * 10.0) + 1.0;
+        float specularValue = Get(lightObjectBuffer)[Get(lightId)].lightColor.w * specIntensity *  pow( clamp( dot( halfVec, normalizedNormal), 0.0, 1.0), specPower );
+        specularColor = Get(lightObjectBuffer)[Get(lightId)].lightColor.rgb * specularValue;
+    }
+    float4 result = float4((diffuseColor + specularColor) * goboVal * attenuation, 0.0);
+    RETURN(result);
+}

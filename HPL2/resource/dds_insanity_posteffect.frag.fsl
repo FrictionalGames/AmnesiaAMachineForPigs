@@ -1,0 +1,48 @@
+/// Copyright © 2009-2020 Frictional Games
+/// Copyright 2023 Michael Pollind
+/// SPDX-License-Identifier: GPL-3.0
+
+STRUCT(PsIn) 
+{
+    DATA(float4, Position, SV_Position);
+    DATA(float2, uv, TEXCOORD0);
+};
+
+PUSH_CONSTANT(rootConstant, b0)
+{
+    DATA(float, time, None);
+    DATA(float, amplitude, None);
+    DATA(float, waveAlpha, None);
+    DATA(float, zoomAlpha, None);
+};
+
+RES(SamplerState, inputSampler, UPDATE_FREQ_NONE, s0, binding = 0);
+RES(Tex2D(float4), sourceInput, UPDATE_FREQ_PER_FRAME, t0, binding = 1);
+RES(Tex2D(float4), ampMap0, UPDATE_FREQ_PER_FRAME, t1, binding = 2);
+RES(Tex2D(float4), ampMap1, UPDATE_FREQ_PER_FRAME, t2, binding = 3);
+RES(Tex2D(float4), zoomMap, UPDATE_FREQ_PER_FRAME, t3, binding = 4);
+
+float4 PS_MAIN(PsIn In) 
+{    
+    INIT_MAIN;
+    uint2 screenSize = uint2(GetDimensions(Get(sourceInput), NO_SAMPLER));
+    float2 viewTexel = 1.0 / float2(screenSize); 
+
+    float4 finalColor = float4(0.0, 0.0, 0.0, 1.0);
+    float3 zoomValue = SampleTex2D(Get(zoomMap), Get(inputSampler), In.uv).rgb;
+    float3 amp0Color = SampleTex2D(Get(ampMap0), Get(inputSampler), In.uv).rgb;
+    float3 amp1Color = SampleTex2D(Get(ampMap1), Get(inputSampler), In.uv).rgb;
+    float3 combinedAmp = amp0Color * (1.0 - Get(amplitude)) + amp1Color * Get(amplitude);
+    float3 ampDir = Get(waveAlpha) * 0.04 * combinedAmp * float(screenSize.y);
+    
+    float2 uv = In.Position.xy;
+    uv += (zoomValue.xy - float2(0.5, 0.5)) * 2.0 * 0.6 * zoomValue.z * screenSize.y * Get(zoomAlpha);
+
+    float2 vSinUv = (uv / screenSize.y) * 0.6;
+    uv.x += sin(Get(time) + vSinUv.y) * ampDir.x;
+    uv.y += sin(Get(time) + vSinUv.x*1.83) * ampDir.y;
+    finalColor = SampleTex2D(Get(sourceInput), Get(inputSampler), uv * viewTexel);
+    finalColor.w = 0.0;
+    RETURN(finalColor);
+}
+
