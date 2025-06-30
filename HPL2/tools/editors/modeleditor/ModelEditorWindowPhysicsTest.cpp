@@ -529,7 +529,7 @@ bool cModelEditorWindowPhysicsTest::OnViewportUpdate(const cGuiMessageData& aDat
 		mpSet->SetAttentionWidget(mpImgViewport);
 
 		pInput->GetLowLevel()->LockInput(true);
-		pInput->GetLowLevel()->MouseRelative(true);
+		pInput->GetLowLevel()->RelativeMouse(true);
 	}
 	else if(mbViewMode==false && mpSet->GetAttentionWidget()==mpImgViewport)
 	{
@@ -537,7 +537,7 @@ bool cModelEditorWindowPhysicsTest::OnViewportUpdate(const cGuiMessageData& aDat
 		mpPrevAttention = NULL;
 
 		pInput->GetLowLevel()->LockInput(false);
-		pInput->GetLowLevel()->MouseRelative(false);
+		pInput->GetLowLevel()->RelativeMouse(false);
 
 		mCamera.SetTumbleActive(false);
 		mCamera.SetTrackActive(false);
@@ -651,7 +651,7 @@ bool cModelEditorWindowPhysicsTest::OnViewportMouseUp(const cGuiMessageData& aDa
 	}
 
 	pInput->GetLowLevel()->LockInput(false);
-	pInput->GetLowLevel()->MouseRelative(false);
+	pInput->GetLowLevel()->RelativeMouse(false);
 
 	if(mbViewMode)
 	{

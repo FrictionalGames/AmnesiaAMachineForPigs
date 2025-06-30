@@ -1059,7 +1059,7 @@ namespace hpl {
 	{
 		;
 
-	//	glFinish();
+		glFinish();
 		//dont use this any more, SwapBuffers() takes care of it
 	}
 

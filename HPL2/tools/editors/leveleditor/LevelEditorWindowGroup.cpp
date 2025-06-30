@@ -221,6 +221,7 @@ void cLevelEditorWindowGroup::OnInitLayout()
 	mpListGroups = mpSet->CreateWidgetListBox(cVector3f(10,50,1), cVector2f(250,340), mpWindow);
 	mpListGroups->SetDefaultFontSize(vTextSize);
 	mpListGroups->AddCallback(eGuiMessage_SelectionChange, this, kGuiCallback(GroupList_OnSelectionChange));
+	AddWidget(mpListGroups);
 
 	mpListGroupEntities = mpSet->CreateWidgetMultiPropertyListBox(cVector3f(270,50,1), cVector2f(340,340), mpWindow);
 	mpListGroupEntities->SetDefaultFontSize(vTextSize);
@@ -228,6 +229,7 @@ void cLevelEditorWindowGroup::OnInitLayout()
 	mpListGroupEntities->AddCallback(eGuiMessage_SelectionChange, this, kGuiCallback(EntityList_OnSelectionChange));
 	mpListGroupEntities->AddColumn("Name", 0);
 	mpListGroupEntities->SetColumnWidth(0,340);
+	AddWidget(mpListGroupEntities);
 
 	cWidgetLabel* pLabelParams = mpSet->CreateWidgetLabel(cVector3f(10,400,0.1f), 0, _W("Group parameters"), mpWindow);
 	pLabelParams->SetDefaultFontSize(vTextSize);
@@ -241,6 +243,7 @@ void cLevelEditorWindowGroup::OnInitLayout()
 	mpCheckBoxGroupVisibility = mpSet->CreateWidgetCheckBox(cVector3f(10,450,0.1f), 0, _W("Visible"),mpWindow);
 	mpCheckBoxGroupVisibility->SetDefaultFontSize(vTextSize);
 	mpCheckBoxGroupVisibility->AddCallback(eGuiMessage_CheckChange, this, kGuiCallback(VisibilityCheckBox_OnChange));
+	AddWidget(mpCheckBoxGroupVisibility);
 
 	mpEditor->SetLayoutNeedsUpdate(true);
 }
